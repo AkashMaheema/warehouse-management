@@ -1,4 +1,4 @@
-package com.warehouse.model;
+package com.warehouse.models;
 
 public class Weight {
     private int weightId;

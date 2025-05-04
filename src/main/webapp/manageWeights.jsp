@@ -1,6 +1,6 @@
 <%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="com.warehouse.model.Weight" %>
+<%@ page import="com.warehouse.models.Weight" %>
 <%@ page import="com.warehouse.dao.WeightDAO" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 

@@ -1,4 +1,4 @@
-package com.warehouse.model;
+package com.warehouse.models;
 
 public class Product {
     private int productId;

@@ -1,11 +1,11 @@
-package com.warehouse.controller;
+package com.warehouse.controllers;
 
 import com.warehouse.dao.ProductDAO;
 import com.warehouse.dao.WeightDAO;
 import com.warehouse.dao.CategoryDAO;
-import com.warehouse.model.Product;
-import com.warehouse.model.Weight;
-import com.warehouse.model.Category;
+import com.warehouse.models.Product;
+import com.warehouse.models.Weight;
+import com.warehouse.models.Category;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;

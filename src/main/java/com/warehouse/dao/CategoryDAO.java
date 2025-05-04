@@ -1,7 +1,7 @@
 package com.warehouse.dao;
 
 import com.warehouse.config.DBConnection;
-import com.warehouse.model.Category;
+import com.warehouse.models.Category;
 
 import java.sql.*;
 import java.util.*;
