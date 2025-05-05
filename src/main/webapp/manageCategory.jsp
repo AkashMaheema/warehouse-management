@@ -34,7 +34,6 @@
         </tbody>
     </table>
 
-    <!-- Add Modal -->
     <div class="modal fade" id="addModal" tabindex="-1">
         <div class="modal-dialog">
             <form id="addForm" class="modal-content">
