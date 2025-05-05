@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,18 +10,13 @@
     <script>
         function addRow() {
             const table = document.getElementById("stockTableBody");
-            const row = table.insertRow();
+                const firstRow = table.rows[0];
+                const newRow = firstRow.cloneNode(true);
 
-            row.innerHTML = `
-                <td><input type="text" name="product_name" class="form-control" required /></td>
-                <td><input type="text" name="category" class="form-control" required /></td>
-                <td><input type="number" name="weight_single_unit" class="form-control" required /></td>
-                <td><input type="number" name="quantity" class="form-control" required /></td>
-                <td><input type="date" name="expire_date" class="form-control" required /></td>
-                <td><input type="text" name="zone" class="form-control" required /></td>
-                <td><input type="text" name="rack" class="form-control" required /></td>
-                <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Remove</button></td>
-            `;
+                // Clear input values in the cloned row
+                newRow.querySelectorAll("input, select").forEach(el => el.value = "");
+
+                table.appendChild(newRow);
         }
 
         function removeRow(btn) {
@@ -31,7 +28,7 @@
 <body>
 <div class="container mt-5">
     <h3>New Rice Stock Entry</h3>
-    <form action="RiceStockInServlet" method="post">
+    <form action="StockInServlet" method="post">
         <div class="form-row mb-3">
             <div class="col-md-4">
                 <label for="supplier_id">Supplier</label>
@@ -74,50 +71,50 @@
             <tbody id="stockTableBody">
                 <tr>
                     <td>
-                            <select name="category" class="form-control" required>
+                            <select name="category[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="c" items="${categoryList}">
-                                <option value="${c}">${c}</option>
+                                <option value="${c.categoryId}">${c.name}</option>
                               </c:forEach>
                             </select>
                     </td>
 
                     <td>
-                            <select name="product_name" class="form-control" required>
+                            <select name="product_name[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="p" items="${productList}">
-                                <option value="${p}">${p}</option>
+                                <option value="${p.productId}">${p.productName}</option>
                               </c:forEach>
                             </select>
                     </td>
 
                     <td>
-                            <select name="weight" class="form-control" required>
+                            <select name="weight[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="w" items="${weightList}">
-                                <option value="${w}">${w}</option>
+                                <option value="${w. weightId}">${w.weightValue} Kg</option>
                               </c:forEach>
                             </select>
                     </td>
 
-                    <td><input type="number" name="quantity" class="form-control" min="0" required /></td>
+                    <td><input type="number" name="quantity[]" class="form-control" min="0" required /></td>
 
-                    <td><input type="date" name="expire_date" class="form-control" required /></td>
+                    <td><input type="date" name="expire_date[]" class="form-control" required /></td>
 
                     <td>
-                            <select name="zone" class="form-control" required>
+                            <select name="zone[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="z" items="${zoneList}">
-                                <option value="${z}">${z}</option>
+                                <option value="${z.zoneid}">${z.zone}</option>
                               </c:forEach>
                             </select>
                     </td>
 
                     <td>
-                            <select name="rack" class="form-control" required>
+                            <select name="rack[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="r" items="${rackList}">
-                                <option value="${r}">${r}</option>
+                                <option value="${r.rackid}">${r.rack}</option>
                               </c:forEach>
                             </select>
                     </td>
