@@ -71,20 +71,34 @@ public class StockInServlet extends HttpServlet {
             // 4. Insert all items
             boolean allItemsInserted = true;
             for (int i = 0; i < productIds.length; i++) {
-                boolean success = dao.insertStockItem(
+                int stockContainId = dao.insertStockItem(
                         stockInId,
                         Integer.parseInt(productIds[i]),
                         Integer.parseInt(quantities[i]),
-                        Integer.parseInt(zoneIds[i]),
-                        Integer.parseInt(rackIds[i]),
+//                        Integer.parseInt(zoneIds[i]),
+//                        Integer.parseInt(rackIds[i]),
                         Date.valueOf(expireDates[i])
                 );
 
-                if (!success) {
+                if (stockContainId == -1) {
+                    allItemsInserted = false;
+                    break;
+                }
+
+                boolean manageSuccess = dao.insertStockManage(
+                        stockContainId,
+                        Integer.parseInt(zoneIds[i]),
+                        Integer.parseInt(rackIds[i]),
+                        Integer.parseInt(quantities[i]),
+                        Integer.parseInt(weightIds[i])
+                );
+
+                if (!manageSuccess) {
                     allItemsInserted = false;
                     break;
                 }
             }
+
 
             // 5. Handle result
             if (allItemsInserted) {

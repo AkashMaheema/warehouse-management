@@ -86,19 +86,43 @@ public class StockInDAO {
         }
     }
 
-    public boolean insertStockItem(int stockInId, int productId, int quantity,
-                                   int zoneId, int rackId, Date expireDate) {
-        String sql = "INSERT INTO stock_contain_items (stockin_id, product_id, quantity, " +
-                "zone_id, rack_id, expiry_date) VALUES (?, ?, ?, ?, ?, ?)";
+    public int insertStockItem(int stockInId, int productId, int quantity, Date expireDate) {
+        String sql = "INSERT INTO stock_contain_items (stockin_id, product_id, quantity, expiry_date) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, stockInId);
             ps.setInt(2, productId);
             ps.setInt(3, quantity);
-            ps.setInt(4, zoneId);
-            ps.setInt(5, rackId);
-            ps.setDate(6, expireDate);
+            ps.setDate(4, expireDate);
 
+            int affectedRows = ps.executeUpdate();
+
+            // Retrieve the generated key (stock_contain_id)
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);  // Return the generated stock_contain_id
+                }
+            }
+
+            return -1; // Return -1 if no generated key is available
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Return -1 on error
+        }
+    }
+
+
+    public boolean insertStockManage(int stockContainId, int zoneId, int rackId,
+                                      int allocatedQuantity, int weightId) {
+        String sql = "INSERT INTO space_manage (stock_contain_id, zone_id, rack_id, allocated_quantity, weight_id) " +
+                "VALUES (?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stockContainId);
+            ps.setInt(2, zoneId);
+            ps.setInt(3, rackId);
+            ps.setInt(4, allocatedQuantity);
+            ps.setInt(5, weightId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

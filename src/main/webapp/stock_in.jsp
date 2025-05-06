@@ -7,23 +7,9 @@
     <meta charset="UTF-8">
     <title>Stock In - Rice</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script>
-        function addRow() {
-            const table = document.getElementById("stockTableBody");
-                const firstRow = table.rows[0];
-                const newRow = firstRow.cloneNode(true);
 
-                // Clear input values in the cloned row
-                newRow.querySelectorAll("input, select").forEach(el => el.value = "");
 
-                table.appendChild(newRow);
-        }
 
-        function removeRow(btn) {
-            const row = btn.parentNode.parentNode;
-            row.remove();
-        }
-    </script>
 </head>
 <body>
 <div class="container mt-5">
@@ -71,7 +57,7 @@
             <tbody id="stockTableBody">
                 <tr>
                     <td>
-                            <select name="categoryId[]" class="form-control" required>
+                            <select name="categoryId[]" class="form-control category-select" required>
                               <option value="">Select</option>
                               <c:forEach var="c" items="${categoryList}">
                                 <option value="${c.categoryId}">${c.name}</option>
@@ -80,7 +66,7 @@
                     </td>
 
                     <td>
-                            <select name="productId[]" class="form-control" required>
+                            <select name="productId[]" class="form-control product-select" required>
                               <option value="">Select</option>
                               <c:forEach var="p" items="${productList}">
                                 <option value="${p.productId}">${p.productName}</option>
@@ -102,21 +88,15 @@
                     <td><input type="date" name="expire_date[]" class="form-control" required /></td>
 
                     <td>
-                            <select name="zoneid[]" class="form-control" required>
-                              <option value="">Select</option>
-                              <c:forEach var="z" items="${zoneList}">
-                                <option value="${z.zoneid}">${z.zone}</option>
-                              </c:forEach>
-                            </select>
+                        <input type="hidden" name="zoneid[]" class="zone-id">
+                        <input type="text" class="form-control zone-name" readonly>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-1 btn-select-zone">Select Zone</button>
                     </td>
 
                     <td>
-                            <select name="rackid[]" class="form-control" required>
-                              <option value="">Select</option>
-                              <c:forEach var="r" items="${rackList}">
-                                <option value="${r.rackid}">${r.rack}</option>
-                              </c:forEach>
-                            </select>
+                        <input type="hidden" name="rackid[]" class="rack-id">
+                        <input type="text" class="form-control rack-name" readonly>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-select-rack">Select Rack</button>
                     </td>
 
                     <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Remove</button></td>
@@ -125,8 +105,63 @@
         </table>
 
 
-        <button type="submit" class="btn btn-success">Submit All Stocks</button>
-    </form>
-</div>
+                <button type="submit" class="btn btn-success">Submit All Stocks</button>
+            </form>
+        </div>
+
+    <!-- Zone Modal -->
+    <div class="modal fade" id="zoneModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Zone</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Zone</th>
+                                <th>Available Capacity (Kg)</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zoneTableBody">
+                            <!-- Will be populated by AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rack Modal -->
+    <div class="modal fade" id="rackModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Rack</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Rack</th>
+                                <th>Available Space (Kg)</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rackTableBody">
+                            <!-- Will be populated by AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="js/stock_in_script.js"></script>
 </body>
 </html>
