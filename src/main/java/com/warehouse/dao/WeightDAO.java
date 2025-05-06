@@ -18,7 +18,7 @@ public class WeightDAO {
 
     // Add a new weight
     public boolean add(double weightValue) {
-        String sql = "INSERT INTO weights(weight_value) VALUES(?)";
+        String sql = "INSERT INTO weights(weight) VALUES(?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, weightValue);
             return ps.executeUpdate() > 0;
@@ -30,7 +30,7 @@ public class WeightDAO {
 
     // Update weight
     public boolean update(int weightId, double weightValue) {
-        String sql = "UPDATE weights SET weight_value=? WHERE weight_id=?";
+        String sql = "UPDATE weights SET weight=? WHERE weight_id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, weightValue);
             ps.setInt(2, weightId);
@@ -63,7 +63,7 @@ public class WeightDAO {
             while (rs.next()) {
                 Weight weight = new Weight(
                         rs.getInt("weight_id"),
-                        rs.getDouble("weight_value")
+                        rs.getDouble("weight")
                 );
                 list.add(weight);
             }
