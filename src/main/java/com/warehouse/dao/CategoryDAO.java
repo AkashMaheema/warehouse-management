@@ -17,7 +17,7 @@ public class CategoryDAO {
     }
     // Add a new category
     public boolean add(String name) {
-        String sql = "INSERT INTO categories(name) VALUES(?)";
+        String sql = "INSERT INTO categories(category_name) VALUES(?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             return ps.executeUpdate() > 0;
@@ -29,7 +29,7 @@ public class CategoryDAO {
 
     // Update category
     public boolean update(int id, String name) {
-        String sql = "UPDATE categories SET name=? WHERE category_id=?";
+        String sql = "UPDATE categories SET category_name=? WHERE category_id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setInt(2, id);
@@ -62,7 +62,7 @@ public class CategoryDAO {
             while (rs.next()) {
                 Category category = new Category(
                         rs.getInt("category_id"),
-                        rs.getString("name")
+                        rs.getString("category_name")
                 );
                 list.add(category);
             }
