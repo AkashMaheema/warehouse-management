@@ -4,6 +4,7 @@ import com.warehouse.config.DBConnection;
 import com.warehouse.models.StockIn;
 import com.warehouse.models.Rack;
 import com.warehouse.models.Zone;
+import com.warehouse.models.Supplier;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -53,12 +54,12 @@ public class StockInDAO {
     }
 
 
-    public List<String> getSupplierList() {
-        List<String> list = new ArrayList<>();
-        String sql = "SELECT name FROM suppliers";
+    public List<Supplier> getSupplierList() {
+        List<Supplier> list = new ArrayList<>();
+        String sql = "SELECT supplier_id, name FROM suppliers";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                list.add(rs.getString("name"));
+                list.add(new Supplier(rs.getInt("supplier_id"), rs.getString("name")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,39 +68,62 @@ public class StockInDAO {
     }
 
 
-    public boolean insertStockIn(StockIn stock) {
-        String sqlMain = "INSERT INTO stock_in (supplier_id, arrival_date) VALUES (?, ?)";
-        String sqlDetails = "INSERT INTO stock_contain_items (stock_in_id, product_id, quantity, zone_id, rack_id, expire_date) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (
-                PreparedStatement psMain = conn.prepareStatement(sqlMain, Statement.RETURN_GENERATED_KEYS);
-                PreparedStatement psDetails = conn.prepareStatement(sqlDetails)
-        ) {
-            // Insert into main table
-            psMain.setString(1, stock.getSupplier());
-            psMain.setDate(2, stock.getArrivalDate());
-            psMain.executeUpdate();
+    public int insertMainStock(int supplierId, Date arrivalDate) throws SQLException {
+        String sql = "INSERT INTO stock_in (supplier_id, arrival_date) VALUES (?, ?)";
 
-            // Get generated stock_in_id
-            ResultSet rs = psMain.getGeneratedKeys();
-            if (rs.next()) {
-                int stockInId = rs.getInt(1);
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, supplierId);
+            ps.setDate(2, arrivalDate);
+            ps.executeUpdate();
 
-                // Insert into details table
-                psDetails.setInt(1, stockInId);
-                psDetails.setString(2, stock.getProductName());  // Assume this is product_id
-                psDetails.setInt(3, stock.getQuantity());
-                psDetails.setString(4, stock.getZone());         // Assuming zone_id
-                psDetails.setString(5, stock.getRack());         // Assuming rack_id
-                psDetails.setDate(6, stock.getExpireDate());
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                throw new SQLException("Failed to get generated stockin_id");
+            }
+        }
+    }
 
+    public boolean insertStockItem(int stockInId, int productId, int quantity,
+                                   int zoneId, int rackId, Date expireDate) {
+        String sql = "INSERT INTO stock_contain_items (stockin_id, product_id, quantity, " +
+                "zone_id, rack_id, expiry_date) VALUES (?, ?, ?, ?, ?, ?)";
 
-                return psDetails.executeUpdate() > 0;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stockInId);
+            ps.setInt(2, productId);
+            ps.setInt(3, quantity);
+            ps.setInt(4, zoneId);
+            ps.setInt(5, rackId);
+            ps.setDate(6, expireDate);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void deleteMainStock(int stockInId) {
+        try {
+            // Delete items first to maintain referential integrity
+            String deleteItems = "DELETE FROM stock_contain_items WHERE stockin_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(deleteItems)) {
+                ps.setInt(1, stockInId);
+                ps.executeUpdate();
+            }
+
+            // Then delete the main record
+            String deleteMain = "DELETE FROM stock_in WHERE id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(deleteMain)) {
+                ps.setInt(1, stockInId);
+                ps.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
 }

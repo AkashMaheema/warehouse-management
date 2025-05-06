@@ -1,45 +1,49 @@
 package com.warehouse.models;
 
 import java.sql.Date;
+import java.util.List;
 
 public class StockIn {
-    private String supplier;
-    private String productName;
-    private String category;
-    private double weight;
-    private int quantity;
-    private Date expireDate;
-    private String zone;
-    private String rack;
+    private int id;
+    private int supplierId;
     private Date arrivalDate;
+    private List<StockItem> items;
 
-    // Getters and Setters
-    public String getSupplier() { return supplier; }
-    public void setSupplier(String supplier) { this.supplier = supplier; }
+    // Default constructor
+    public StockIn() {
+    }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    // Getters
+    public int getId() {
+        return id;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public int getSupplierId() {
+        return supplierId;
+    }
 
-    public double getWeight() { return weight; }
-    public void setWeight(double weight) { this.weight = weight; }
+    public Date getArrivalDate() {
+        return arrivalDate;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public List<StockItem> getItems() {
+        return items;
+    }
 
-    public Date getExpireDate() { return expireDate; }
-    public void setExpireDate(Date expireDate) { this.expireDate = expireDate; }
+    // Setters
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getZone() { return zone; }
-    public void setZone(String zone) { this.zone = zone; }
+    public void setSupplierId(int supplierId) {
+        this.supplierId = supplierId;
+    }
 
-    public String getRack() { return rack; }
-    public void setRack(String rack) { this.rack = rack; }
+    public void setArrivalDate(Date arrivalDate) {
+        this.arrivalDate = arrivalDate;
+    }
 
-    public Date getArrivalDate() { return arrivalDate; }
-    public void setArrivalDate(Date arrivalDate) { this.arrivalDate = arrivalDate; }
-
-
+    public void setItems(List<StockItem> items) {
+        this.items = items;
+    }
 }

@@ -32,10 +32,10 @@
         <div class="form-row mb-3">
             <div class="col-md-4">
                 <label for="supplier_id">Supplier</label>
-                <select name="supplier" class="form-control" required>
+                <select name="supplierid" class="form-control" required>
                      <option value="">Select</option>
                          <c:forEach var="s" items="${supplierList}">
-                         <option value="${s}">${s}</option>
+                         <option value="${s.supplierid}">${s.supplier}</option>
                      </c:forEach>
                 </select>
             </div>
@@ -50,8 +50,8 @@
                         <button type="button" class="btn btn-info" onclick="addRow()">Add New Stock </button>
                     </div>
                     <div class="col-md-4 offset-md-4 text-end">
-                        <button type="button" class="btn btn-info" onclick="">Add New Product </button>
-                        <button type="button" class="btn btn-info" onclick="">Add New Client </button>
+                        <button type="button" class="btn btn-info" >Add New Product </button>
+                        <button type="button" class="btn btn-info" >Add New Supplier </button>
                     </div>
         </div>
 
@@ -71,7 +71,7 @@
             <tbody id="stockTableBody">
                 <tr>
                     <td>
-                            <select name="category[]" class="form-control" required>
+                            <select name="categoryId[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="c" items="${categoryList}">
                                 <option value="${c.categoryId}">${c.name}</option>
@@ -80,7 +80,7 @@
                     </td>
 
                     <td>
-                            <select name="product_name[]" class="form-control" required>
+                            <select name="productId[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="p" items="${productList}">
                                 <option value="${p.productId}">${p.productName}</option>
@@ -89,7 +89,7 @@
                     </td>
 
                     <td>
-                            <select name="weight[]" class="form-control" required>
+                            <select name="weightId[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="w" items="${weightList}">
                                 <option value="${w. weightId}">${w.weightValue} Kg</option>
@@ -102,7 +102,7 @@
                     <td><input type="date" name="expire_date[]" class="form-control" required /></td>
 
                     <td>
-                            <select name="zone[]" class="form-control" required>
+                            <select name="zoneid[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="z" items="${zoneList}">
                                 <option value="${z.zoneid}">${z.zone}</option>
@@ -111,7 +111,7 @@
                     </td>
 
                     <td>
-                            <select name="rack[]" class="form-control" required>
+                            <select name="rackid[]" class="form-control" required>
                               <option value="">Select</option>
                               <c:forEach var="r" items="${rackList}">
                                 <option value="${r.rackid}">${r.rack}</option>

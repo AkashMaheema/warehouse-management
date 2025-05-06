@@ -35,10 +35,6 @@ public class StockInServlet extends HttpServlet {
         request.setAttribute("productList", products);
         request.setAttribute("categoryList", categories);
         request.setAttribute("weightList", weights);
-
-//        request.setAttribute("productList", dao.getProductList());
-//        request.setAttribute("categoryList", dao.getCategoryList());
-//        request.setAttribute("weightList", dao.getWeightList());
         request.setAttribute("zoneList", dao.getZoneList());
         request.setAttribute("rackList", dao.getRackList());
         request.setAttribute("supplierList", dao.getSupplierList());
@@ -46,41 +42,75 @@ public class StockInServlet extends HttpServlet {
         request.getRequestDispatcher("stock_in.jsp").forward(request, response);  // your JSP file
     }
 
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String supplier = request.getParameter("supplier");
-        Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
+        try {
+            // 1. Get main stock info (single record)
+            int supplierId = Integer.parseInt(request.getParameter("supplierid"));
+            Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
 
-        String[] productNames = request.getParameterValues("product_name[]");
-        String[] categories = request.getParameterValues("category[]");
-        String[] weights = request.getParameterValues("weight[]");
-        String[] quantities = request.getParameterValues("quantity[]");
-        String[] expireDates = request.getParameterValues("expire_date[]");
-        String[] zones = request.getParameterValues("zone[]");
-        String[] racks = request.getParameterValues("rack[]");
+            // 2. Get all item details (multiple records)
+            String[] productIds = request.getParameterValues("productId[]");
+            String[] quantities = request.getParameterValues("quantity[]");
+            String[] expireDates = request.getParameterValues("expire_date[]");
+            String[] zoneIds = request.getParameterValues("zoneid[]");
+            String[] rackIds = request.getParameterValues("rackid[]");
+            String[] weightIds = request.getParameterValues("weightId[]");
+            String[] categoryIds = request.getParameterValues("categoryId[]");
 
-        List<StockIn> stockInList = new ArrayList<>();
+            // Validate all arrays have same length
+            if (!allArraysSameLength(productIds, quantities, expireDates, zoneIds, rackIds)) {
+                throw new ServletException("Invalid form data: arrays have different lengths");
+            }
 
-        for (int i = 0; i < productNames.length; i++) {
-            StockIn stock = new StockIn();
-            stock.setSupplier(supplier);
-            stock.setArrivalDate(arrivalDate);
-            stock.setProductName(productNames[i]);
-            stock.setCategory(categories[i]);
-            stock.setWeight(Double.parseDouble(weights[i]));
-            stock.setQuantity(Integer.parseInt(quantities[i]));
-            stock.setExpireDate(Date.valueOf(expireDates[i]));
-            stock.setZone(zones[i]);
-            stock.setRack(racks[i]);
+            // 3. Create and insert the main stock record
+            StockInDAO dao = new StockInDAO();
+            int stockInId = dao.insertMainStock(supplierId, arrivalDate);
 
-            stockInList.add(stock);
+            // 4. Insert all items
+            boolean allItemsInserted = true;
+            for (int i = 0; i < productIds.length; i++) {
+                boolean success = dao.insertStockItem(
+                        stockInId,
+                        Integer.parseInt(productIds[i]),
+                        Integer.parseInt(quantities[i]),
+                        Integer.parseInt(zoneIds[i]),
+                        Integer.parseInt(rackIds[i]),
+                        Date.valueOf(expireDates[i])
+                );
+
+                if (!success) {
+                    allItemsInserted = false;
+                    break;
+                }
+            }
+
+            // 5. Handle result
+            if (allItemsInserted) {
+                request.getSession().setAttribute("successMessage", "Stock successfully added!");
+            } else {
+                // Rollback if any item failed
+                request.getSession().setAttribute("errorMessage", "Failed to add some stock items");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+
+            }
+
+            response.sendRedirect("StockInServlet");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "Error: " + e.getMessage());
+            request.getRequestDispatcher("error.jsp").forward(request, response);
         }
+    }
 
-        StockInDAO dao = new StockInDAO();
-        for (StockIn s : stockInList) {
-            dao.insertStockIn(s);
+    private boolean allArraysSameLength(String[]... arrays) {
+        if (arrays.length == 0) return true;
+        int length = arrays[0].length;
+        for (String[] array : arrays) {
+            if (array.length != length) return false;
         }
-
-        response.sendRedirect("StockInServlet");  // triggers doGet()
+        return true;
     }
 }
