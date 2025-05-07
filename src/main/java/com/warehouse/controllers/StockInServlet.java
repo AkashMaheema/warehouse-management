@@ -15,6 +15,7 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @WebServlet("/StockInServlet")
@@ -58,6 +59,7 @@ public class StockInServlet extends HttpServlet {
             String[] rackIds = request.getParameterValues("rackid[]");
             String[] weightIds = request.getParameterValues("weightId[]");
             String[] categoryIds = request.getParameterValues("categoryId[]");
+            String status = "pending";
 
             // Validate all arrays have same length
             if (!allArraysSameLength(productIds, quantities, expireDates, zoneIds, rackIds)) {
@@ -66,7 +68,7 @@ public class StockInServlet extends HttpServlet {
 
             // 3. Create and insert the main stock record
             StockInDAO dao = new StockInDAO();
-            int stockInId = dao.insertMainStock(supplierId, arrivalDate);
+            int stockInId = dao.insertMainStock(supplierId, arrivalDate, status);
 
             // 4. Insert all items
             boolean allItemsInserted = true;

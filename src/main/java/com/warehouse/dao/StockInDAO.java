@@ -69,12 +69,13 @@ public class StockInDAO {
 
 
 
-    public int insertMainStock(int supplierId, Date arrivalDate) throws SQLException {
-        String sql = "INSERT INTO stock_in (supplier_id, arrival_date) VALUES (?, ?)";
+    public int insertMainStock(int supplierId, Date arrivalDate, String status) throws SQLException {
+        String sql = "INSERT INTO stock_in (supplier_id, arrival_date, status) VALUES (?, ?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, supplierId);
             ps.setDate(2, arrivalDate);
+            ps.setString(3, status);
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -130,24 +131,26 @@ public class StockInDAO {
         }
     }
 
-    public void deleteMainStock(int stockInId) {
-        try {
-            // Delete items first to maintain referential integrity
-            String deleteItems = "DELETE FROM stock_contain_items WHERE stockin_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(deleteItems)) {
-                ps.setInt(1, stockInId);
-                ps.executeUpdate();
-            }
+    //no usage until implement the admin approval part
 
-            // Then delete the main record
-            String deleteMain = "DELETE FROM stock_in WHERE id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(deleteMain)) {
-                ps.setInt(1, stockInId);
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void deleteMainStock(int stockInId) {
+//        try {
+//            // Delete items first to maintain referential integrity
+//            String deleteItems = "DELETE FROM stock_contain_items WHERE stockin_id = ?";
+//            try (PreparedStatement ps = conn.prepareStatement(deleteItems)) {
+//                ps.setInt(1, stockInId);
+//                ps.executeUpdate();
+//            }
+//
+//            // Then delete the main record
+//            String deleteMain = "DELETE FROM stock_in WHERE id = ?";
+//            try (PreparedStatement ps = conn.prepareStatement(deleteMain)) {
+//                ps.setInt(1, stockInId);
+//                ps.executeUpdate();
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 }

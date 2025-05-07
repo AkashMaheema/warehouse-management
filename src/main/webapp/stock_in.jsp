@@ -7,11 +7,27 @@
     <meta charset="UTF-8">
     <title>Stock In - Rice</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 <body>
+<%
+    String successMessage = (String) session.getAttribute("successMessage");
+    if (successMessage != null) {
+%>
+    <div class="d-flex justify-content-center mt-3">
+        <div class="alert alert-success alert-dismissible fade show text-center shadow-sm rounded px-4 py-2" role="alert" style="width: 320px;">
+            ✅ Stored successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+<%
+        session.removeAttribute("successMessage");
+    }
+%>
+
+
+
 <div class="container mt-5">
     <h3>New Rice Stock Entry</h3>
     <form action="StockInServlet" method="post">
@@ -163,5 +179,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src="js/stock_in_script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
