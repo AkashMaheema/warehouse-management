@@ -5,7 +5,6 @@ import java.util.List;
 
 public class StockIn {
     private int id;
-    private int supplierId;
     private Date arrivalDate;
     private List<StockItem> items;
 
@@ -28,9 +27,6 @@ public class StockIn {
         return id;
     }
 
-    public int getSupplierId() {
-        return supplierId;
-    }
 
     public Date getArrivalDate() {
         return arrivalDate;
@@ -45,9 +41,6 @@ public class StockIn {
         this.id = id;
     }
 
-    public void setSupplierId(int supplierId) {
-        this.supplierId = supplierId;
-    }
 
     public void setArrivalDate(Date arrivalDate) {
         this.arrivalDate = arrivalDate;

@@ -37,7 +37,7 @@
                 <select name="supplierid" class="form-control" required>
                      <option value="">Select</option>
                          <c:forEach var="s" items="${supplierList}">
-                         <option value="${s.supplierid}">${s.supplier}</option>
+                         <option value="${s.supplierId}">${s.name}</option>
                      </c:forEach>
                 </select>
             </div>

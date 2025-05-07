@@ -22,7 +22,7 @@ public class SupplierDAO {
     }
 
     public boolean add(String name, String contactPerson, String phone, String email) {
-        String sql = "INSERT INTO suppliers (supplier_name, contact_person, phone, email) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO suppliers (name, contact_person, phone, email) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setString(2, contactPerson);
@@ -36,7 +36,7 @@ public class SupplierDAO {
     }
 
     public boolean update(int id, String name, String contactPerson, String phone, String email) {
-        String sql = "UPDATE suppliers SET supplier_name=?, contact_person=?, phone=?, email=? WHERE supplier_id=?";
+        String sql = "UPDATE suppliers SET name=?, contact_person=?, phone=?, email=? WHERE supplier_id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setString(2, contactPerson);
@@ -70,7 +70,7 @@ public class SupplierDAO {
             while (rs.next()) {
                 Supplier supplier = new Supplier(
                         rs.getInt("supplier_id"),
-                        rs.getString("supplier_name"),
+                        rs.getString("name"),
                         rs.getString("contact_person"),
                         rs.getString("phone"),
                         rs.getString("email")

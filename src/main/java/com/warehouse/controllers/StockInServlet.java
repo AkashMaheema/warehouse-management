@@ -2,10 +2,12 @@ package com.warehouse.controllers;
 
 import com.warehouse.dao.CategoryDAO;
 import com.warehouse.dao.ProductDAO;
+import com.warehouse.dao.SupplierDAO;
 import com.warehouse.dao.StockInDAO;
 import com.warehouse.dao.WeightDAO;
 import com.warehouse.models.Category;
 import com.warehouse.models.Product;
+import com.warehouse.models.Supplier;
 import com.warehouse.models.StockIn;
 import com.warehouse.models.Weight;
 
@@ -28,17 +30,19 @@ public class StockInServlet extends HttpServlet {
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
         WeightDAO weightDAO = new WeightDAO();
+        SupplierDAO supplierDAO = new SupplierDAO();
 
         List<Product> products = productDAO.getAll();
         List<Category> categories = categoryDAO.getAll();
         List<Weight> weights = weightDAO.getAll();
+        List<Supplier> suppliers = supplierDAO.getAll();
 
         request.setAttribute("productList", products);
         request.setAttribute("categoryList", categories);
         request.setAttribute("weightList", weights);
         request.setAttribute("zoneList", dao.getZoneList());
         request.setAttribute("rackList", dao.getRackList());
-        request.setAttribute("supplierList", dao.getSupplierList());
+        request.setAttribute("supplierList", suppliers);
 
         request.getRequestDispatcher("stock_in.jsp").forward(request, response);  // your JSP file
     }
