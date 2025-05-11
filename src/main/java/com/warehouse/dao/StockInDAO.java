@@ -53,22 +53,6 @@ public class StockInDAO {
         return list;
     }
 
-
-    public List<Supplier> getSupplierList() {
-        List<Supplier> list = new ArrayList<>();
-        String sql = "SELECT supplier_id, name FROM suppliers";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(new Supplier(rs.getInt("supplier_id"), rs.getString("name")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-
-
     public int insertMainStock(int supplierId, Date arrivalDate, String status) throws SQLException {
         String sql = "INSERT INTO stock_in (supplier_id, arrival_date, status) VALUES (?, ?, ?)";
 
