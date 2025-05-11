@@ -18,6 +18,8 @@ public class SupplierServlet extends HttpServlet {
         String action = req.getParameter("action");
         SupplierDAO dao = new SupplierDAO();
 
+
+
         switch (action) {
             case "create":
                 dao.add(
@@ -45,6 +47,7 @@ public class SupplierServlet extends HttpServlet {
         }
 
         res.sendRedirect(req.getContextPath() + "/manageSupplier");
+
     }
 
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {

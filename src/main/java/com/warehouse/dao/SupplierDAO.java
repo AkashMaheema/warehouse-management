@@ -83,4 +83,25 @@ public class SupplierDAO {
 
         return list;
     }
+
+    public Supplier getSupplierById(int id) {
+        String sql = "SELECT * FROM suppliers WHERE supplier_id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Supplier(
+                        rs.getInt("supplier_id"),
+                        rs.getString("name"),
+                        rs.getString("contact_person"),
+                        rs.getString("phone"),
+                        rs.getString("email")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
