@@ -8,6 +8,12 @@ public class Supplier {
     private String phone;
     private String email;
 
+    public Supplier(String name, String contactPerson, String phone, String email) {
+        this.name = name;
+        this.contactPerson = contactPerson;
+        this.phone = phone;
+        this.email = email;
+    }
 
     public Supplier(int supplierId, String name, String contactPerson, String phone, String email) {
         this.supplierId = supplierId;

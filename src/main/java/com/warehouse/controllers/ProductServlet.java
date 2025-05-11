@@ -1,5 +1,6 @@
 package com.warehouse.controllers;
 
+import com.google.gson.Gson;
 import com.warehouse.dao.ProductDAO;
 import com.warehouse.dao.WeightDAO;
 import com.warehouse.dao.CategoryDAO;
@@ -46,36 +47,44 @@ public class ProductServlet extends HttpServlet {
 
         switch (action) {
             case "create":
-                String productName = request.getParameter("productName");
+                String name = request.getParameter("productName");
                 int categoryId = Integer.parseInt(request.getParameter("categoryId"));
                 int weightId = Integer.parseInt(request.getParameter("weightId"));
                 int reorderLevel = Integer.parseInt(request.getParameter("reorderLevel"));
 
-                Product newProduct = new Product(productName, categoryId, weightId, reorderLevel);
-                productDAO.add(newProduct);
+                Product product = new Product(name, categoryId, weightId, reorderLevel);
+                int productId = productDAO.add(product);
+                if (productId != -1) {
+                    product.setProductId(productId);
+                }
+
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                String json = new Gson().toJson(product);
+                response.getWriter().write(json);
                 break;
 
             case "update":
-                int productId = Integer.parseInt(request.getParameter("productId"));
+                int updateProductId = Integer.parseInt(request.getParameter("productId"));
                 String updatedName = request.getParameter("productName");
                 int updatedCategoryId = Integer.parseInt(request.getParameter("categoryId"));
                 int updatedWeightId = Integer.parseInt(request.getParameter("weightId"));
                 int updatedReorderLevel = Integer.parseInt(request.getParameter("reorderLevel"));
 
-                Product updatedProduct = new Product(productId, updatedName, updatedCategoryId, updatedWeightId, updatedReorderLevel);
+                Product updatedProduct = new Product(updateProductId, updatedName, updatedCategoryId, updatedWeightId, updatedReorderLevel);
                 productDAO.update(updatedProduct);
+                response.setStatus(HttpServletResponse.SC_OK);
                 break;
 
             case "delete":
-                productDAO.delete(Integer.parseInt(request.getParameter("id")));
+                productDAO.delete(Integer.parseInt(request.getParameter("productId")));
+                response.setStatus(HttpServletResponse.SC_OK);
                 break;
 
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+                break;
         }
-
-        response.sendRedirect("manageProduct"); // Refresh the page
     }
-
 }
 

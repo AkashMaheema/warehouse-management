@@ -18,19 +18,33 @@ public class ProductDAO {
     }
 
     // Add a new product
-    public boolean add(Product product) {
-        String sql = "INSERT INTO products(product_name, category_id, weight_id, reorder_level) VALUES(?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, product.getProductName());
-            ps.setInt(2, product.getCategoryId());
-            ps.setInt(3, product.getWeightId());
-            ps.setInt(4, product.getReorderLevel());
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+    public int add(Product product) {
+        int generatedId = -1;
+        String sql = "INSERT INTO products (product_name, category_id, weight_id, reorder_level) VALUES (?, ?, ?, ?)";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, product.getProductName());
+            stmt.setInt(2, product.getCategoryId());
+            stmt.setInt(3, product.getWeightId());
+            stmt.setInt(4, product.getReorderLevel());
+
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedId = rs.getInt(1);
+                        product.setProductId(generatedId); // Set it in the object too if needed
+                    }
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return generatedId; // -1 if failed
     }
+
 
     // Update product
     public boolean update(Product product) {

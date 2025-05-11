@@ -116,7 +116,7 @@ public class StockInServlet extends HttpServlet {
 
             }
 
-            response.sendRedirect("StockInServlet");
+            response.sendRedirect("StockIn");
 
         } catch (Exception e) {
             e.printStackTrace();
