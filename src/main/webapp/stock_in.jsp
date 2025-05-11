@@ -31,19 +31,23 @@
     <div class="container mt-5">
         <h3>New Rice Stock Entry</h3>
         <form action="StockIn" method="post">
+        <c:if test="${not empty stockIn}">
+            <input type="hidden" name="stockInId" value="${stockIn.id}">
+            <input type="hidden" name="action" value="update">
+        </c:if>
             <div class="form-row mb-3">
                 <div class="col-md-4">
                     <label for="supplier_id">Supplier</label>
                     <select name="supplierId" class="form-control supplier-select" required>
-                         <option value="">Select</option>
-                             <c:forEach var="s" items="${supplierList}">
-                             <option value="${s.supplierId}">${s.name}</option>
-                         </c:forEach>
+                        <option value="">Select</option>
+                        <c:forEach var="s" items="${supplierList}">
+                            <option value="${s.supplierId}" ${stockIn.supplierId == s.supplierId ? 'selected' : ''}>${s.name}</option>
+                        </c:forEach>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <label for="arrival_date">Arrival Date</label>
-                    <input type="date" name="arrival_date" class="form-control" required>
+                    <input type="date" name="arrival_date" class="form-control" value="${stockIn.arrivalDate}" required>
                 </div>
             </div>
 
@@ -56,74 +60,162 @@
                             <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalSupplier">Add New Supplier </button>
                         </div>
             </div>
-
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Product Category</th>
-                        <th>Product Name</th>
-                        <th>Product Weight (Single Unit)</th>
-                        <th>Quantity</th>
-                        <th>Product Expiry Date</th>
-                        <th>Zone</th>
-                        <th>Rack</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="stockTableBody">
-                    <tr>
-                        <td>
-                                <select name="categoryId[]" class="form-control category-select" required>
-                                  <option value="">Select</option>
-                                  <c:forEach var="c" items="${categoryList}">
-                                    <option value="${c.categoryId}">${c.name}</option>
-                                  </c:forEach>
-                                </select>
-                        </td>
-
-                        <td>
-                                <select name="productId[]" class="form-control product-select" required>
-                                  <option value="">Select</option>
-                                  <c:forEach var="p" items="${productList}">
-                                    <option value="${p.productId}">${p.productName}</option>
-                                  </c:forEach>
-                                </select>
-                        </td>
-
-                        <td>
-                                <select name="weightId[]" class="form-control" required>
-                                  <option value="">Select</option>
-                                  <c:forEach var="w" items="${weightList}">
-                                    <option value="${w. weightId}">${w.weightValue} Kg</option>
-                                  </c:forEach>
-                                </select>
-                        </td>
-
-                        <td><input type="number" name="quantity[]" class="form-control" min="0" required /></td>
-
-                        <td><input type="date" name="expire_date[]" class="form-control" required /></td>
-
-                        <td>
-                            <input type="hidden" name="zoneid[]" class="zone-id">
-                            <input type="text" class="form-control zone-name" readonly>
-                            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btn-select-zone">Select Zone</button>
-                        </td>
-
-                        <td>
-                            <input type="hidden" name="rackid[]" class="rack-id">
-                            <input type="text" class="form-control rack-name" readonly>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-select-rack">Select Rack</button>
-                        </td>
-
-                        <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Remove</button></td>
-                    </tr>
-                </tbody>
-            </table>
-
-
-                    <button type="submit" class="btn btn-success">Submit All Stocks</button>
-                </form>
-            </div>
+                                <table class="table table-bordered">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Product Category</th>
+                                            <th>Product Name</th>
+                                            <th>Product Weight</th>
+                                            <th>Quantity</th>
+                                            <th>Expiry Date</th>
+                                            <th>Zone</th>
+                                            <th>Rack</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stockTableBody">
+                                        <c:choose>
+                                            <c:when test="${not empty stockIn && not empty stockIn.items}">
+                                                <c:forEach var="item" items="${stockIn.items}">
+                                                    <tr>
+                                                        <td>
+                                                            <select name="categoryId[]" class="form-control category-select" required>
+                                                                <option value="">Select</option>
+                                                                <c:forEach var="c" items="${categoryList}">
+                                                                    <option value="${c.categoryId}"
+                                                                        ${item.categoryId == c.categoryId ? 'selected' : ''}>
+                                                                        ${c.name}
+                                                                    </option>
+                                                                </c:forEach>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="productId[]" class="form-control product-select" required>
+                                                                <option value="">Select</option>
+                                                                <c:forEach var="p" items="${productList}">
+                                                                    <option value="${p.productId}"
+                                                                        ${item.productId == p.productId ? 'selected' : ''}>
+                                                                        ${p.productName}
+                                                                    </option>
+                                                                </c:forEach>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="weightId[]" class="form-control weight-select" required>
+                                                                <option value="">Select</option>
+                                                                <c:forEach var="w" items="${weightList}">
+                                                                    <option value="${w.weightId}"
+                                                                        ${item.weightId == w.weightId ? 'selected' : ''}>
+                                                                        ${w.weightValue} Kg
+                                                                    </option>
+                                                                </c:forEach>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="quantity[]" class="form-control"
+                                                                value="${item.quantity}" min="1" required>
+                                                        </td>
+                                                        <td>
+                                                            <input type="date" name="expire_date[]" class="form-control"
+                                                                value="${item.expireDate}" required>
+                                                        </td>
+                                                        <td>
+                                                            <input type="hidden" name="zoneid[]" class="zone-id" value="${item.zoneId}">
+                                                            <input type="text" class="form-control zone-name"
+                                                                value="${zoneMap[item.zoneId].name}" readonly>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btn-select-zone">
+                                                                Select Zone
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <input type="hidden" name="rackid[]" class="rack-id" value="${item.rackId}">
+                                                            <input type="text" class="form-control rack-name"
+                                                                value="${rackMap[item.rackId].name}" readonly>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-select-rack">
+                                                                Select Rack
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <tr>
+                                                    <td>
+                                                        <select name="categoryId[]" class="form-control category-select" required>
+                                                            <option value="">Select</option>
+                                                            <c:forEach var="c" items="${categoryList}">
+                                                                <option value="${c.categoryId}">${c.name}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="productId[]" class="form-control product-select" required>
+                                                            <option value="">Select</option>
+                                                            <c:forEach var="p" items="${productList}">
+                                                                <option value="${p.productId}">${p.productName}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="weightId[]" class="form-control weight-select" required>
+                                                            <option value="">Select</option>
+                                                            <c:forEach var="w" items="${weightList}">
+                                                                <option value="${w.weightId}">${w.weightValue} Kg</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" name="quantity[]" class="form-control" min="1" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="date" name="expire_date[]" class="form-control" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="hidden" name="zoneid[]" class="zone-id">
+                                                        <input type="text" class="form-control zone-name" readonly>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary mt-1 btn-select-zone">
+                                                            Select Zone
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <input type="hidden" name="rackid[]" class="rack-id">
+                                                        <input type="text" class="form-control rack-name" readonly>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-select-rack">
+                                                            Select Rack
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="text-center mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <c:choose>
+                                    <c:when test="${not empty stockIn}">
+                                        Update Stock
+                                    </c:when>
+                                    <c:otherwise>
+                                        Submit Stock
+                                    </c:otherwise>
+                                </c:choose>
+                            </button>
+                            <a href="StockIn" class="btn btn-secondary btn-lg ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
 
         <!-- Zone Modal -->
         <div class="modal fade" id="zoneModal" tabindex="-1" role="dialog">
@@ -230,76 +322,6 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script src="js/stock_in_script.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            // Parse the JSON data passed from the servlet
-            const allProducts = ${productListJson};
-            const allWeights = ${weightListJson};
 
-            $(document).ready(function() {
-                // Initialize the first row
-                initRow($('#stockTableBody tr:first'));
-
-                // When category changes, update products
-                $(document).on('change', '.category-select', function() {
-                    const row = $(this).closest('tr');
-                    const categoryId = parseInt($(this).val());
-                    const productSelect = row.find('.product-select');
-                    const weightSelect = row.find('.weight-select');
-
-                    // Reset both product and weight selects
-                    productSelect.empty().append('<option value="">Select</option>').prop('disabled', true);
-                    weightSelect.empty().append('<option value="">Select</option>').prop('disabled', true);
-
-                    if (categoryId) {
-                        // Filter products by category
-                        const filteredProducts = allProducts.filter(p => parseInt(p.categoryId) === categoryId);
-
-                        // Populate product select
-                        if (filteredProducts.length > 0) {
-                            filteredProducts.forEach(product => {
-                                productSelect.append($('<option>', {
-                                    value: product.productId,
-                                    text: product.productName
-                                }));
-                            });
-                            productSelect.prop('disabled', false);
-                        }
-                    }
-                });
-
-                // When product changes, update weights
-                $(document).on('change', '.product-select', function() {
-                    const row = $(this).closest('tr');
-                    const productId = parseInt($(this).val());
-                    const weightSelect = row.find('.weight-select');
-
-                    // Reset weight select
-                    weightSelect.empty().append('<option value="">Select</option>').prop('disabled', true);
-
-                    if (productId) {
-                        // Filter weights by product
-                        const filteredWeights = allWeights.filter(w => parseInt(w.productId) === productId);
-
-                        // Populate weight select
-                        if (filteredWeights.length > 0) {
-                            filteredWeights.forEach(weight => {
-                                weightSelect.append($('<option>', {
-                                    value: weight.weightId,
-                                    text: weight.weightValue + ' Kg'
-                                }));
-                            });
-                            weightSelect.prop('disabled', false);
-                        }
-                    }
-                });
-            });
-
-            function initRow(row) {
-                // Initialize a new row with empty selects
-                row.find('.category-select').val('');
-                row.find('.product-select').empty().append('<option value="">Select</option>').prop('disabled', true);
-                row.find('.weight-select').empty().append('<option value="">Select</option>').prop('disabled', true);
-            }
-        </script>
     </body>
     </html>

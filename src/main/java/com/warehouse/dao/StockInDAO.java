@@ -1,10 +1,7 @@
 package com.warehouse.dao;
 
 import com.warehouse.config.DBConnection;
-import com.warehouse.models.StockIn;
-import com.warehouse.models.Rack;
-import com.warehouse.models.Zone;
-import com.warehouse.models.Supplier;
+import com.warehouse.models.*;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -98,7 +95,7 @@ public class StockInDAO {
 
 
     public boolean insertStockManage(int stockContainId, int zoneId, int rackId,
-                                      int allocatedQuantity, int weightId) {
+                                     int allocatedQuantity, int weightId) {
         String sql = "INSERT INTO space_manage (stock_contain_id, zone_id, rack_id, allocated_quantity, weight_id) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
@@ -136,5 +133,97 @@ public class StockInDAO {
 //            e.printStackTrace();
 //        }
 //    }
+
+    public List<StockIn> getPendingStocks() throws SQLException {
+        List<StockIn> pendingStocks = new ArrayList<>();
+        String sql = "SELECT s.stockin_id, s.supplier_id, sup.name as supplier_name, " +
+                "s.arrival_date, s.timestamp " +
+                "FROM stock_in s " +
+                "JOIN suppliers sup ON s.supplier_id = sup.supplier_id " +
+                "WHERE s.status = 'pending' " +
+                "ORDER BY s.timestamp DESC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                StockIn stock = new StockIn();
+                stock.setId(rs.getInt("stockin_id"));
+                stock.setSupplierId(rs.getInt("supplier_id"));
+                stock.setSupplierName(rs.getString("supplier_name"));
+                stock.setArrivalDate(rs.getDate("arrival_date"));
+                stock.setCreatedDate(rs.getDate("timestamp"));
+                pendingStocks.add(stock);
+            }
+        }
+        return pendingStocks;
+    }
+
+    // Get stock by ID
+    public StockIn getStockInById(int stockInId) throws SQLException {
+        String sql = "SELECT s.stockin_id, s.supplier_id, sup.name as supplier_name, " +
+                "s.arrival_date, s.timestamp " +
+                "FROM stock_in s " +
+                "JOIN suppliers sup ON s.supplier_id = sup.supplier_id " +
+                "WHERE s.stockin_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stockInId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                StockIn stock = new StockIn();
+                stock.setId(rs.getInt("stockin_id"));
+                stock.setSupplierId(rs.getInt("supplier_id"));
+                stock.setSupplierName(rs.getString("supplier_name"));
+                stock.setArrivalDate(rs.getDate("arrival_date"));
+                stock.setCreatedDate(rs.getDate("timestamp"));
+                stock.setItems(getStockItems(stockInId));
+                return stock;
+            }
+        }
+        return null;
+    }
+
+    // Update stock status
+    public boolean updateStockStatus(int stockInId, String status) throws SQLException {
+        String sql = "UPDATE stock_in SET status = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, stockInId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // Get items for a stock
+    private List<StockItem> getStockItems(int stockInId) throws SQLException {
+        List<StockItem> items = new ArrayList<>();
+        String sql = "SELECT sci.stock_contain_id, sci.stockin_id ,sci.product_id, p.product_name, p.category_id,p.weight_id, " +
+                "sci.quantity, sci.expiry_date, " +
+                "sm.zone_id, z.zone_name, sm.rack_id, r.rack_name " +
+                "FROM stock_contain_items sci " +
+                "JOIN products p ON sci.product_id = p.product_id " +
+                "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                "JOIN zones z ON sm.zone_id = z.zone_id " +
+                "JOIN racks r ON sm.rack_id = r.rack_id " +
+                "WHERE sci.stockin_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stockInId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                StockItem item = new StockItem();
+                item.setId(rs.getInt("stock_contain_id"));
+                item.setStockInId(rs.getInt("stockin_id"));
+                item.setProductId(rs.getInt("product_id"));
+                item.setCategoryId(rs.getInt("category_id"));
+                item.setWeightId(rs.getInt("weight_id"));
+                item.setQuantity(rs.getInt("quantity"));
+                item.setZoneId(rs.getInt("zone_id"));
+                item.setRackId(rs.getInt("rack_id"));
+                item.setExpireDate(rs.getDate("expiry_date"));
+                items.add(item);
+            }
+        }
+        return items;
+    }
 
 }
