@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@WebServlet("/StockInServlet")
+@WebServlet("/StockIn")
 public class StockInServlet extends HttpServlet {
 
     @Override

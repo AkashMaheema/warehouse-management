@@ -52,8 +52,8 @@
                         <button type="button" class="btn btn-info" onclick="addRow()">Add New Stock </button>
                     </div>
                     <div class="col-md-4 offset-md-4 text-end">
-                        <button type="button" class="btn btn-info" >Add New Product </button>
-                        <button type="button" class="btn btn-info" >Add New Supplier </button>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalProduct" >Add New Product </button>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalSupplier">Add New Supplier </button>
                     </div>
         </div>
 
@@ -176,10 +176,90 @@
             </div>
         </div>
     </div>
+
+    <!-- Add Modal -->
+        <div class="modal fade" id="addModalProduct" tabindex="-1">
+            <div class="modal-dialog">
+                <form id="addFormProduct" class="modal-content">
+                    <div class="modal-header"><h5>Add Product</h5></div>
+                    <div class="modal-body">
+                        <input type="text" name="productName" class="form-control" placeholder="Product Name" required/>
+                        <!-- Category Selector -->
+                        <select name="categoryId" class="form-control mt-2" required>
+                            <option value="">Select Category</option>
+                            <c:forEach var="category" items="${categories}">
+                                <option value="${category.categoryId}">${category.name}</option>
+                            </c:forEach>
+                        </select>
+                        <!-- Weight Selector -->
+                        <select name="weightId" class="form-control mt-2" required>
+                            <option value="">Select Weight</option>
+                            <c:forEach var="weight" items="${weights}">
+                                <option value="${weight.weightId}">${weight.weightValue} Kg</option>
+                            </c:forEach>
+                        </select>
+                        <input type="number" name="reorderLevel" class="form-control mt-2" placeholder="Reorder Level" required/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Supplier Modal -->
+            <div class="modal fade" id="addModalSupplier" tabindex="-1">
+                <div class="modal-dialog">
+                    <form id="addFormSupplier" class="modal-content">
+                        <div class="modal-header"><h5>Add Supplier</h5></div>
+                        <div class="modal-body">
+                            <input type="text" name="name" class="form-control mb-2" placeholder="Supplier Name" required/>
+                            <input type="text" name="contactPerson" class="form-control mb-2" placeholder="Contact Person" required/>
+                            <input type="text" name="phone" class="form-control mb-2" placeholder="Phone" required/>
+                            <input type="email" name="email" class="form-control mb-2" placeholder="Email" required/>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src="js/stock_in_script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+            $('#addFormProduct').submit(function(e) {
+                e.preventDefault();
+                $.post('manageProduct', {
+                    action: 'create',
+                    productName: $(this).find('[name=productName]').val(),
+                    categoryId: $(this).find('[name=categoryId]').val(),
+                    weightId: $(this).find('[name=weightId]').val(),
+                    reorderLevel: $(this).find('[name=reorderLevel]').val()
+                }, function() {
+                    location.reload(); // Refresh the page after adding the product
+                });
+            });
 
+
+
+           $('#addFormSupplier').submit(function(e) {
+                        e.preventDefault();
+                        $.post('manageSupplier', {
+                            action: 'create',
+                            name: $(this).find('[name=name]').val(),
+                            contactPerson: $(this).find('[name=contactPerson]').val(),
+                            phone: $(this).find('[name=phone]').val(),
+                            email: $(this).find('[name=email]').val()
+                        }, function() {
+                            location.reload();
+                        });
+
+
+            });
+    </script>
 </body>
 </html>
