@@ -5,6 +5,7 @@ import com.warehouse.dao.ProductDAO;
 import com.warehouse.dao.WeightDAO;
 import com.warehouse.dao.CategoryDAO;
 import com.warehouse.models.Product;
+import com.warehouse.models.Supplier;
 import com.warehouse.models.Weight;
 import com.warehouse.models.Category;
 
@@ -13,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @WebServlet("/manageProduct")
@@ -54,14 +56,24 @@ public class ProductServlet extends HttpServlet {
 
                 Product product = new Product(name, categoryId, weightId, reorderLevel);
                 int productId = productDAO.add(product);
-                if (productId != -1) {
-                    product.setProductId(productId);
-                }
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                String json = new Gson().toJson(product);
-                response.getWriter().write(json);
+
+                PrintWriter out = response.getWriter();
+
+                if (productId != -1) {
+                    product.setProductId(productId);
+                    Gson gson = new Gson();
+                    String json = gson.toJson(product);
+                    out.write(json);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    out.write("{\"error\": \"Failed to add supplier\"}");
+                }
+
+                out.flush();
+                out.close();
                 break;
 
             case "update":

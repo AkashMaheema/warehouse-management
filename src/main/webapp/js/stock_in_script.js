@@ -108,7 +108,7 @@
 
             $('#rackModal').modal('hide');
         });
-        $(document).ready(function () {
+$(document).ready(function () {
             // Product form submission
             $('#addFormProduct').submit(function (e) {
                 e.preventDefault();
@@ -119,12 +119,11 @@
                     data: $(this).serialize() + '&action=create',
                     dataType: 'json', // Force JSON parsing
                     success: function (newProduct) {
-                        console.log("Returned Product JSON:", newProduct);
                         $('.product-select').each(function () {
                             $(this).append(
                                 $('<option>', {
-                                    value: newProduct.prodasasuctId,
-                                    text: newProduct.as
+                                    value: newProduct.productId,
+                                    text: newProduct.productName
                                 })
                             );
                         });
@@ -148,8 +147,6 @@
                     data: $(this).serialize() + '&action=create',
                     dataType: 'json',
                     success: function (newSupplier) {
-                        console.log("Returned Supplier JSON:", newSupplier); // Check the response in the browser console
-
                         // Find all the supplier select elements and add the new supplier option dynamically
                         $('.supplier-select').each(function () {
                             $(this).append(
@@ -172,9 +169,8 @@
                 });
             });
         });
-
-    function addRow() {
+function addRow() {
         var newRow = $('#stockTableBody tr:first').clone();
         newRow.find('input, select').val('');
         $('#stockTableBody').append(newRow);
-    }
+}

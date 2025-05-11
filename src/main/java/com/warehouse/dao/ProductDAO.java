@@ -76,7 +76,7 @@ public class ProductDAO {
 
     public List<Product> getAll() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT p.product_id, p.product_name, c.category_name, " +
+        String sql = "SELECT p.product_id, p.product_name, c.category_id, c.category_name, w.weight_id ," +
                 "w.weight, p.reorder_level " +
                 "FROM products p " +
                 "JOIN categories c ON p.category_id = c.category_id " +
@@ -90,7 +90,9 @@ public class ProductDAO {
                 product.setProductId(rs.getInt("product_id"));
                 product.setProductName(rs.getString("product_name"));
                 product.setCategoryName(rs.getString("category_name"));
+                product.setCategoryId(rs.getInt("category_id"));
                 product.setWeightValue(rs.getDouble("weight"));
+                product.setWeightId(rs.getInt("weight_id"));
                 product.setReorderLevel(rs.getInt("reorder_level"));
                 list.add(product);
             }

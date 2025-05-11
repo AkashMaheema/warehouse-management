@@ -30,11 +30,11 @@
 
     <div class="container mt-5">
         <h3>New Rice Stock Entry</h3>
-        <form action="StockInServlet" method="post">
+        <form action="StockIn" method="post">
             <div class="form-row mb-3">
                 <div class="col-md-4">
                     <label for="supplier_id">Supplier</label>
-                    <select name="supplierId[]" id="supplierDropdown"class="form-control supplier-select" required>
+                    <select name="supplierId" class="form-control supplier-select" required>
                          <option value="">Select</option>
                              <c:forEach var="s" items="${supplierList}">
                              <option value="${s.supplierId}">${s.name}</option>
@@ -230,6 +230,76 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script src="js/stock_in_script.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Parse the JSON data passed from the servlet
+            const allProducts = ${productListJson};
+            const allWeights = ${weightListJson};
 
+            $(document).ready(function() {
+                // Initialize the first row
+                initRow($('#stockTableBody tr:first'));
+
+                // When category changes, update products
+                $(document).on('change', '.category-select', function() {
+                    const row = $(this).closest('tr');
+                    const categoryId = parseInt($(this).val());
+                    const productSelect = row.find('.product-select');
+                    const weightSelect = row.find('.weight-select');
+
+                    // Reset both product and weight selects
+                    productSelect.empty().append('<option value="">Select</option>').prop('disabled', true);
+                    weightSelect.empty().append('<option value="">Select</option>').prop('disabled', true);
+
+                    if (categoryId) {
+                        // Filter products by category
+                        const filteredProducts = allProducts.filter(p => parseInt(p.categoryId) === categoryId);
+
+                        // Populate product select
+                        if (filteredProducts.length > 0) {
+                            filteredProducts.forEach(product => {
+                                productSelect.append($('<option>', {
+                                    value: product.productId,
+                                    text: product.productName
+                                }));
+                            });
+                            productSelect.prop('disabled', false);
+                        }
+                    }
+                });
+
+                // When product changes, update weights
+                $(document).on('change', '.product-select', function() {
+                    const row = $(this).closest('tr');
+                    const productId = parseInt($(this).val());
+                    const weightSelect = row.find('.weight-select');
+
+                    // Reset weight select
+                    weightSelect.empty().append('<option value="">Select</option>').prop('disabled', true);
+
+                    if (productId) {
+                        // Filter weights by product
+                        const filteredWeights = allWeights.filter(w => parseInt(w.productId) === productId);
+
+                        // Populate weight select
+                        if (filteredWeights.length > 0) {
+                            filteredWeights.forEach(weight => {
+                                weightSelect.append($('<option>', {
+                                    value: weight.weightId,
+                                    text: weight.weightValue + ' Kg'
+                                }));
+                            });
+                            weightSelect.prop('disabled', false);
+                        }
+                    }
+                });
+            });
+
+            function initRow(row) {
+                // Initialize a new row with empty selects
+                row.find('.category-select').val('');
+                row.find('.product-select').empty().append('<option value="">Select</option>').prop('disabled', true);
+                row.find('.weight-select').empty().append('<option value="">Select</option>').prop('disabled', true);
+            }
+        </script>
     </body>
     </html>

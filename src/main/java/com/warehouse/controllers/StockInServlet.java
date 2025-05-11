@@ -1,5 +1,6 @@
 package com.warehouse.controllers;
 
+import com.google.gson.Gson;
 import com.warehouse.dao.CategoryDAO;
 import com.warehouse.dao.ProductDAO;
 import com.warehouse.dao.SupplierDAO;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
 @WebServlet("/StockIn")
@@ -44,6 +46,14 @@ public class StockInServlet extends HttpServlet {
         request.setAttribute("rackList", dao.getRackList());
         request.setAttribute("supplierList", suppliers);
 
+        Gson gson = new Gson();
+        String productListJson = gson.toJson(products);
+        String weightListJson = gson.toJson(weights);
+
+        // Set as request attributes
+        request.setAttribute("productListJson", productListJson);
+        request.setAttribute("weightListJson", weightListJson);
+
         request.getRequestDispatcher("stock_in.jsp").forward(request, response);  // your JSP file
     }
 
@@ -51,8 +61,25 @@ public class StockInServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // Log all request parameters for debugging
+            System.out.println("===== START REQUEST PARAMETERS =====");
+            System.out.println("Method: " + request.getMethod());
+
+            // Print all parameter names and values
+            Enumeration<String> paramNames = request.getParameterNames();
+            while (paramNames.hasMoreElements()) {
+                String paramName = paramNames.nextElement();
+                String[] paramValues = request.getParameterValues(paramName);
+
+                if (paramValues.length == 1) {
+                    System.out.println(paramName + ": " + paramValues[0]);
+                } else {
+                    System.out.println(paramName + ": " + Arrays.toString(paramValues));
+                }
+            }
+            System.out.println("===== END REQUEST PARAMETERS =====");
             // 1. Get main stock info (single record)
-            int supplierId = Integer.parseInt(request.getParameter("supplierid"));
+            int supplierId = Integer.parseInt(request.getParameter("supplierId"));
             Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
 
             // 2. Get all item details (multiple records)
