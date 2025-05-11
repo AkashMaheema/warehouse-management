@@ -41,6 +41,8 @@
             <li class="list-group-item"><a class="text-decoration-none" href="manageWeights">➕ Manage Weight</a></li>
             <li class="list-group-item"><a class="text-decoration-none" href="manageProduct">➕ Manage Product</a></li>
             <li class="list-group-item"><a class="text-decoration-none" href="manageSupplier">➕ Manage Supplier</a></li>
+            <li class="list-group-item"><a class="text-decoration-none" href="manageUser">➕ Manage user</a></li>
+
         </ul>
     </div>
 </div>
