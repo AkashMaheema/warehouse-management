@@ -33,9 +33,8 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.10.1</version> <!-- Use the latest version if needed -->
+      <version>2.10.1</version>
     </dependency>
-
   </dependencies>
   <build>
     <finalName>warehouse-management</finalName>
