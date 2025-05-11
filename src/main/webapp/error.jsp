@@ -19,8 +19,13 @@
     <div class="error-box">
         <h2>Error Occurred</h2>
         <p>${sessionScope.errorMessage}</p>
-        <a href="StockInServlet">Go back to stock page</a>
+        <a href="StockIn">Go back to stock page</a>
     </div>
     <c:remove var="errorMessage" scope="session"/>
+
+    <h2>Something went wrong:</h2>
+    <p>${errorMessage}</p>
+    <pre style="background:#f8f8f8; padding:1em;">${errorStack}</pre>
+
 </body>
 </html>
