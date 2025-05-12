@@ -349,14 +349,14 @@
                </td>
                <td>
                    <select class="form-select product-select" name="productId" required>
-                       <c:forEach var="product" items="${products}">
+                       <c:forEach var="product" items="${productList}">
                            <option value="${product.productId}">${product.productName}</option>
                        </c:forEach>
                    </select>
                </td>
                <td>
                    <select class="form-select weight-select" name="weightId" required>
-                       <c:forEach var="weight" items="${weights}">
+                       <c:forEach var="weight" items="${weightList}">
                            <option value="${weight.weightId}">${weight.weightValue}</option>
                        </c:forEach>
                    </select>
@@ -366,7 +366,7 @@
                           name="expectedQuantity" value="1" min="1" required>
                </td>
               <td>
-                  <input type="date" class="form-control expiry-date-input" name="expiryDate" required>
+                  <input type="date" class="form-control expiry-date-input" name="expiryDate" value="<fmt:formatDate value="${item.expiryDate}" pattern="yyyy-MM-dd" />" required>
               </td>
                <td>
                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">
