@@ -2,6 +2,8 @@ package com.warehouse.dao;
 
 import com.warehouse.config.DBConnection;
 import com.warehouse.models.ASN;
+import com.warehouse.models.Category;
+import com.warehouse.models.IncidentItem;
 import com.warehouse.models.ASNItem;
 import com.warehouse.models.Supplier;
 import com.warehouse.models.Product;
@@ -283,30 +285,68 @@ public class ASNDAO {
         }
     }
 
-    public boolean updateASNWithItems(ASN asn, List<ASNItem> items) throws SQLException {
+    public boolean updateASNWithItemsAndIncidents(ASN asn, List<ASNItem> items, List<IncidentItem> incidents) throws SQLException {
         Connection connection = null;
         try {
             connection = getConnection();
             connection.setAutoCommit(false);
 
-            // Update ASN header
+            // 1. Update ASN header
             if (!updateASN(connection, asn)) {
                 connection.rollback();
                 return false;
             }
 
-            // Update only existing ASN items
+            // 2. Update ASN items
             for (ASNItem item : items) {
-                System.out.println("Updating ASN Item: " + item);
                 item.setAsnId(asn.getAsnId());
-
                 if (item.getAsnItemId() > 0) {
                     if (!updateASNItem(connection, item)) {
                         connection.rollback();
                         return false;
                     }
                 }
-                // Ignore items with asnItemId <= 0 (no new additions)
+            }
+
+            // 3. Handle incident items
+            for (IncidentItem incident : incidents) {
+                // First, validate the incident quantity doesn't exceed available quantity
+                int availableQty = getAvailableQuantity(connection, incident.getAsnItemId());
+                if (incident.getIncidentQuantity() > availableQty) {
+                    connection.rollback();
+                    throw new SQLException("Incident quantity exceeds available quantity for item ID: " + incident.getAsnItemId());
+                }
+
+                // Reduce the expected quantity in the original ASN item
+                String updateQtySql = "UPDATE asn_items SET expected_quantity = expected_quantity - ? WHERE asn_item_id = ?";
+                try (PreparedStatement stmt = connection.prepareStatement(updateQtySql)) {
+                    stmt.setInt(1, incident.getIncidentQuantity());
+                    stmt.setInt(2, incident.getAsnItemId());
+                    if (stmt.executeUpdate() <= 0) {
+                        connection.rollback();
+                        return false;
+                    }
+                }
+
+                // Insert the incident record
+                String insertIncidentSql = "INSERT INTO incident_items (asn_item_id, incident_type, incident_quantity) VALUES (?, ?, ?)";
+                try (PreparedStatement stmt = connection.prepareStatement(insertIncidentSql, Statement.RETURN_GENERATED_KEYS)) {
+                    stmt.setInt(1, incident.getAsnItemId());
+                    stmt.setString(2, incident.getIncidentType());
+                    stmt.setInt(3, incident.getIncidentQuantity());
+
+                    if (stmt.executeUpdate() <= 0) {
+                        connection.rollback();
+                        return false;
+                    }
+
+                    // Set the generated ID if needed
+                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            incident.setId(generatedKeys.getInt(1));
+                        }
+                    }
+                }
             }
 
             connection.commit();
@@ -326,6 +366,62 @@ public class ASNDAO {
         }
     }
 
+    private int getAvailableQuantity(Connection connection, int asnItemId) throws SQLException {
+        String sql = "SELECT expected_quantity FROM asn_items WHERE asn_item_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, asnItemId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("expected_quantity");
+                }
+            }
+        }
+        throw new SQLException("ASN item not found with ID: " + asnItemId);
+    }
+
+    public List<IncidentItem> getIncidentItems(int asnId) throws SQLException {
+        List<IncidentItem> incidents = new ArrayList<>();
+        String sql = "SELECT ii.id, ii.asn_item_id, ii.incident_type, ii.incident_quantity, " +
+                "ai.product_id, ai.weight_id, ai.expected_quantity, ai.category_id, ai.expiry_date, " +
+                "p.product_name, w.weight, c.category_name as category_name " +
+                "FROM incident_items ii " +
+                "JOIN asn_items ai ON ii.asn_item_id = ai.asn_item_id " +
+                "JOIN products p ON ai.product_id = p.product_id " +
+                "JOIN weights w ON ai.weight_id = w.weight_id " +
+                "JOIN categories c ON ai.category_id = c.category_id " +
+                "WHERE ai.asn_id = ?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, asnId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    IncidentItem incident = new IncidentItem();
+                    incident.setId(rs.getInt("id"));
+                    incident.setAsnItemId(rs.getInt("asn_item_id"));
+                    incident.setIncidentType(rs.getString("incident_type"));
+                    incident.setIncidentQuantity(rs.getInt("incident_quantity"));
+
+                    ASNItem asnItem = new ASNItem();
+                    asnItem.setAsnItemId(rs.getInt("asn_item_id"));
+                    asnItem.setProductId(rs.getInt("product_id"));
+                    asnItem.setWeightId(rs.getInt("weight_id"));
+                    asnItem.setExpectedQuantity(rs.getInt("expected_quantity"));
+                    asnItem.setCategoryId(rs.getInt("category_id"));
+                    asnItem.setExpiryDate(rs.getDate("expiry_date"));
+
+                    Product product = new Product();
+                    product.setProductName(rs.getString("product_name"));
+                    asnItem.setProduct(product);
+
+                    incident.setAsnItem(asnItem);
+                    incidents.add(incident);
+                }
+            }
+        }
+        return incidents;
+    }
 
     private boolean updateASNWithConnection(ASN asn, Connection connection) throws SQLException {
         String sql = "UPDATE asn SET supplier_id = ?, reference_number = ?, expected_arrival_date = ? WHERE asn_id = ?";

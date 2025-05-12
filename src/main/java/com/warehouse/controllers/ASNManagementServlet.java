@@ -107,7 +107,7 @@ public class ASNManagementServlet extends HttpServlet {
             WeightDAO weightDAO = new WeightDAO();
             SupplierDAO supplierDAO = new SupplierDAO();
 
-            // Fetch lists of products, categories, weights, and suppliers to set them as attributes
+            // Fetch lists of products, categories, weights, and suppliers
             List<Product> products = productDAO.getAll();
             List<Category> categories = categoryDAO.getAll();
             List<Weight> weights = weightDAO.getAll();
@@ -128,41 +128,15 @@ public class ASNManagementServlet extends HttpServlet {
                 throw new ServletException("ASN not found");
             }
 
-            // Mapping ASN details (already done by your DAO)
+            // Get incident items for this ASN
+            List<IncidentItem> incidentItems = asnDao.getIncidentItems(asnId);
+            request.setAttribute("incidentItems", incidentItems);
+
+            // Set ASN details
             request.setAttribute("asn", asn);
 
-            // Mapping ASN items from the form
-            List<ASNItem> items = new ArrayList<>();
-            int index = 0;
-
-            while (request.getParameter("items[" + index + "].productId") != null) {
-                ASNItem item = new ASNItem();
-
-                // Map ASN Item fields from the request
-                item.setAsnItemId(Integer.parseInt(request.getParameter("items[" + index + "].asnItemId")));
-                item.setProductId(Integer.parseInt(request.getParameter("items[" + index + "].productId")));
-                item.setWeightId(Integer.parseInt(request.getParameter("items[" + index + "].weightId")));
-                item.setExpectedQuantity(Integer.parseInt(request.getParameter("items[" + index + "].expectedQuantity")));
-                item.setCategoryId(Integer.parseInt(request.getParameter("items[" + index + "].categoryId")));
-                item.setExpiryDate(Date.valueOf(request.getParameter("items[" + index + "].expiryDate")));
-
-                // Add to the list of items
-                items.add(item);
-                index++;
-            }
-
-            // Call DAO method to update ASN and its items
-            boolean success = asnDao.updateASNWithItems(asn, items);
-
-            if (success) {
-                // If successful, redirect to a success page or return the updated ASN to the JSP
-                request.setAttribute("message", "ASN and items updated successfully!");
-                request.getRequestDispatcher("asn_details.jsp").forward(request, response);
-            } else {
-                // If update fails, set error message
-                request.setAttribute("message", "Failed to update ASN and items.");
-                request.getRequestDispatcher("asn_details.jsp").forward(request, response);
-            }
+            // Forward to the JSP page
+            request.getRequestDispatcher("asn_details.jsp").forward(request, response);
 
         } catch (Exception e) {
             throw new ServletException("Failed to view ASN details: " + e.getMessage(), e);
@@ -181,6 +155,9 @@ public class ASNManagementServlet extends HttpServlet {
                 return;
             }
 
+            // Get incident items if they exist
+            List<IncidentItem> incidentItems = asnDao.getIncidentItems(asnId);
+
             StringBuilder html = new StringBuilder();
             html.append("<div class='row'>");
             html.append("<div class='col-md-6'><strong>ASN ID:</strong> ASN-").append(asn.getAsnId()).append("</div>");
@@ -198,7 +175,8 @@ public class ASNManagementServlet extends HttpServlet {
             html.append("<div class='col-md-6'><strong>Created Date:</strong> ").append(dateFormat.format(asn.getCreatedAt())).append("</div>");
             html.append("</div>");
 
-            html.append("<h5 class='mt-4'>Items</h5>");
+            // ASN Items Table
+            html.append("<h5 class='mt-4'>ASN Items</h5>");
             html.append("<table class='table table-bordered'>");
             html.append("<thead><tr><th>Product</th><th>Weight</th><th>Quantity</th></tr></thead>");
             html.append("<tbody>");
@@ -213,10 +191,47 @@ public class ASNManagementServlet extends HttpServlet {
 
             html.append("</tbody></table>");
 
+            // Incident Report (only if there are incidents)
+            if (incidentItems != null && !incidentItems.isEmpty()) {
+                html.append("<div class='card border-danger mt-4'>");
+                html.append("<div class='card-header bg-danger text-white'>");
+                html.append("<h5 class='mb-0'>Incident Report (").append(incidentItems.size()).append(")</h5>");
+                html.append("</div>");
+                html.append("<div class='card-body p-0'>");
+                html.append("<table class='table table-hover mb-0'>");
+                html.append("<thead class='table-light'><tr>");
+                html.append("<th>Product</th><th>Type</th><th>Qty Affected</th><th>Remaining</th>");
+                html.append("</tr></thead><tbody>");
+
+                for (IncidentItem incident : incidentItems) {
+                    html.append("<tr class='").append(incident.getIncidentType().equals("damaged") ? "table-danger" : "table-warning").append("'>");
+                    html.append("<td>").append(incident.getAsnItem().getProduct().getProductName()).append("</td>");
+                    html.append("<td>");
+                    html.append("<span class='badge ").append(incident.getIncidentType().equals("damaged") ? "bg-danger" : "bg-warning").append("'>");
+                    html.append(incident.getIncidentType().substring(0, 1).toUpperCase())
+                            .append(incident.getIncidentType().substring(1).toLowerCase());
+                    html.append("</span></td>");
+                    html.append("<td>").append(incident.getIncidentQuantity()).append("</td>");
+                    html.append("<td>").append(incident.getAsnItem().getExpectedQuantity()).append("</td>");
+                    html.append("</tr>");
+                }
+
+                html.append("</tbody></table>");
+                html.append("</div>"); // card-body
+                html.append("<div class='card-footer bg-light'>");
+                html.append("<small class='text-muted'>");
+                html.append("<i class='fas fa-info-circle me-1'></i>");
+                html.append("Damaged items marked in red, missing items in yellow");
+                html.append("</small>");
+                html.append("</div>"); // card-footer
+                html.append("</div>"); // card
+            }
+
             response.setContentType("text/html");
             response.getWriter().write(html.toString());
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -342,8 +357,9 @@ public class ASNManagementServlet extends HttpServlet {
             asn.setExpectedArrivalDate(expectedArrivalDate);
 
             List<ASNItem> items = new ArrayList<>();
+            List<IncidentItem> incidents = new ArrayList<>();
 
-            // Handle items with empty bracket format []
+            // Handle ASN items
             String[] asnItemIds = request.getParameterValues("items[].asnItemId");
             if (asnItemIds != null) {
                 for (int i = 0; i < asnItemIds.length; i++) {
@@ -358,9 +374,21 @@ public class ASNManagementServlet extends HttpServlet {
                 }
             }
 
+            // Handle incident items
+            String[] incidentAsnItemIds = request.getParameterValues("incidents[].asnItemId");
+            if (incidentAsnItemIds != null) {
+                for (int i = 0; i < incidentAsnItemIds.length; i++) {
+                    IncidentItem incident = new IncidentItem();
+                    incident.setAsnItemId(Integer.parseInt(incidentAsnItemIds[i]));
+                    incident.setIncidentType(request.getParameterValues("incidents[].incidentType")[i]);
+                    incident.setIncidentQuantity(Integer.parseInt(request.getParameterValues("incidents[].incidentQuantity")[i]));
+                    incidents.add(incident);
+                }
+            }
+
             // Use DAO to update
             ASNDAO asnDao = new ASNDAO();
-            boolean success = asnDao.updateASNWithItems(asn, items);
+            boolean success = asnDao.updateASNWithItemsAndIncidents(asn, items, incidents);
 
             if (success) {
                 response.setContentType("text/plain");
@@ -373,7 +401,6 @@ public class ASNManagementServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
-
     private void deleteASNItem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int asnItemId = Integer.parseInt(request.getParameter("asnItemId"));

@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html>
@@ -36,6 +37,25 @@
             right: 20px;
             z-index: 1100;
         }
+        .incident-card {
+            border-left: 4px solid #dc3545;
+            margin-top: 20px;
+        }
+        .incident-item {
+            background-color: #fff3f3;
+        }
+        .incident-type-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .incident-quantity-input {
+            display: none;
+            margin-left: 10px;
+        }
+        .table-danger { background-color: #fff5f5 !important; }
+        .table-warning { background-color: #fffbf0 !important; }
+        .card-header h5 { font-weight: 600; }
     </style>
 </head>
 <body>
@@ -142,13 +162,63 @@
                         </div>
                     </div>
                 </div>
+                <!-- Incident Report Card -->
+                <c:if test="${not empty incidentItems}">
+                <div class="card border-danger mb-4 mt-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Incident Report (${fn:length(incidentItems)})
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>Type</th>
+                                        <th>Qty Affected</th>
+                                        <th>Remaining</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="incident" items="${incidentItems}" varStatus="loop">
+                                        <tr class="${incident.incidentType == 'damaged' ? 'table-danger' : 'table-warning'}">
+                                            <td>${loop.index + 1}</td>
+                                            <td>${incident.asnItem.product.productName}</td>
+                                            <td>
+                                                <span class="badge ${incident.incidentType == 'damaged' ? 'bg-danger' : 'bg-warning'}">
+                                                    <c:choose>
+                                                        <c:when test="${incident.incidentType == 'damaged'}">Damaged</c:when>
+                                                        <c:otherwise>Missing</c:otherwise>
+                                                    </c:choose>
+                                                </span>
+                                            </td>
+                                            <td>${incident.incidentQuantity}</td>
+                                            <td>${incident.asnItem.expectedQuantity}</td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Damaged items marked in red, missing items in yellow
+                        </small>
+                    </div>
+                </div>
+                </c:if>
             </div>
         </div>
     </div>
 
     <!-- Edit ASN Modal -->
     <div class="modal fade" id="editASNModal" tabindex="-1" aria-labelledby="editASNModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editASNModalLabel">Edit ASN - ASN-${asn.asnId}</h5>
@@ -199,6 +269,7 @@
                                                 <th>Weight (Kg)</th>
                                                 <th>Quantity</th>
                                                 <th>Product Expiry Date</th>
+                                                <th>Inspection Status</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -239,11 +310,23 @@
                                                    <td>
                                                        <input type="date" class="form-control expiry-date-input"
                                                               name="expiryDate" value="<fmt:formatDate value="${item.expiryDate}" pattern="yyyy-MM-dd" />" required>
-                                                   </td>
+                                                    </td>
                                                     <td>
-                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">
-                                                            Delete
-                                                        </button>
+                                                          <div class="incident-options" data-expected-qty="${item.expectedQuantity}" data-item-id="${item.asnItemId}">
+                                                            <label><input type="radio" name="issue_${item.asnItemId}" value="none" checked> None</label><br>
+                                                            <label><input type="radio" name="issue_${item.asnItemId}" value="damaged"> Damaged</label><br>
+                                                            <label><input type="radio" name="issue_${item.asnItemId}" value="missing"> Missing</label>
+
+                                                            <input type="number"
+                                                                   class="incident-qty-input form-control"
+                                                                   name="incidentQty_${item.asnItemId}"
+                                                                   placeholder="Qty"
+                                                                   style="display: none; width: 80px; margin-top: 5px;"
+                                                                   min="1">
+                                                          </div>
+                                                    </td>
+                                                    <td>
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">Delete</button>
                                                     </td>
                                                 </tr>
                                             </c:forEach>
@@ -252,6 +335,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -266,6 +350,21 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+
+$(document).on('change', 'input[type="radio"][name^="issue_"]', function () {
+    const $container = $(this).closest('.incident-options');
+    const selectedValue = $(this).val();
+    const $qtyInput = $container.find('.incident-qty-input');
+    const maxQty = $container.data('expected-qty');
+
+    if (selectedValue === 'none') {
+        $qtyInput.hide().val('');
+    } else {
+        $qtyInput.show().attr('max', maxQty);
+    }
+});
+
+
         function approveASN(asnId) {
             Swal.fire({
                 title: 'Approve ASN',
@@ -336,46 +435,58 @@
             });
         }
 
-       function addNewItemRow() {
-           const tableBody = document.querySelector('#itemsTable tbody');
-           const newRow = document.createElement('tr');
-           newRow.innerHTML = `
-               <td>
-                     <select class="form-select category-select" name="categoryId" required>
-                       <c:forEach var="category" items="${categoryList}">
-                           <option value="${category.categoryId}">${category.name}</option>
-                       </c:forEach>
+        function addNewItemRow() {
+            const tableBody = document.querySelector('#itemsTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <select class="form-select category-select" name="categoryId" required>
+                        <c:forEach var="category" items="${categoryList}">
+                            <option value="${category.categoryId}">${category.name}</option>
+                        </c:forEach>
                     </select>
-               </td>
-               <td>
-                   <select class="form-select product-select" name="productId" required>
-                       <c:forEach var="product" items="${productList}">
-                           <option value="${product.productId}">${product.productName}</option>
-                       </c:forEach>
-                   </select>
-               </td>
-               <td>
-                   <select class="form-select weight-select" name="weightId" required>
-                       <c:forEach var="weight" items="${weightList}">
-                           <option value="${weight.weightId}">${weight.weightValue}</option>
-                       </c:forEach>
-                   </select>
-               </td>
-               <td>
-                   <input type="number" class="form-control quantity-input"
-                          name="expectedQuantity" value="1" min="1" required>
-               </td>
-              <td>
-                  <input type="date" class="form-control expiry-date-input" name="expiryDate" value="<fmt:formatDate value="${item.expiryDate}" pattern="yyyy-MM-dd" />" required>
-              </td>
-               <td>
-                   <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">
-                       Delete
-                   </button>
-               </td>
-           `;
-           tableBody.appendChild(newRow);
-       }
+                </td>
+                <td>
+                    <select class="form-select product-select" name="productId" required>
+                        <c:forEach var="product" items="${productList}">
+                            <option value="${product.productId}">${product.productName}</option>
+                        </c:forEach>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-select weight-select" name="weightId" required>
+                        <c:forEach var="weight" items="${weightList}">
+                            <option value="${weight.weightId}">${weight.weightValue}</option>
+                        </c:forEach>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="form-control quantity-input"
+                           name="expectedQuantity" value="1" min="1" required>
+                </td>
+                <td>
+                    <input type="date" class="form-control expiry-date-input"
+                           name="expiryDate" value="<fmt:formatDate value="${item.expiryDate}" pattern="yyyy-MM-dd" />" required>
+                </td>
+                <td>
+                    <div class="incident-options" data-expected-qty="1">
+                        <label><input type="radio" name="issue_new" value="none" checked> None</label><br>
+                        <label><input type="radio" name="issue_new" value="damaged"> Damaged</label><br>
+                        <label><input type="radio" name="issue_new" value="missing"> Missing</label>
+                        <input type="number"
+                               class="incident-qty-input form-control"
+                               name="incidentQty_new"
+                               placeholder="Qty"
+                               style="display: none; width: 80px; margin-top: 5px;"
+                               min="1">
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+        }
 
        function removeItemRow(button) {
            const row = button.closest('tr');
@@ -408,6 +519,16 @@ function saveASNChanges() {
         params.append(`items[${index}].weightId`, row.querySelector('.weight-select').value);
         params.append(`items[${index}].expectedQuantity`, row.querySelector('.quantity-input').value);
         params.append(`items[${index}].expiryDate`, row.querySelector('.expiry-date-input').value);
+
+        const incidentOptions = row.querySelector('.incident-options');
+                const incidentType = incidentOptions.querySelector('input[type="radio"]:checked').value;
+                const incidentQtyInput = incidentOptions.querySelector('.incident-qty-input');
+
+                if (incidentType !== 'none' && incidentQtyInput.value) {
+                    params.append(`incidents[].asnItemId`, row.dataset.itemId);
+                    params.append(`incidents[].incidentType`, incidentType);
+                    params.append(`incidents[].incidentQuantity`, incidentQtyInput.value);
+                }
     });
 
     // Show loading alert
