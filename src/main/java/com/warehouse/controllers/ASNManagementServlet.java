@@ -2,7 +2,7 @@ package com.warehouse.controllers;
 
 import com.warehouse.dao.*;
 import com.warehouse.models.*;
-
+import com.warehouse.config.DBConnection;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -63,6 +63,8 @@ public class ASNManagementServlet extends HttpServlet {
                 updateASN(request, response);
             } else if ("deleteItem".equals(action)) {
                 deleteASNItem(request, response);
+            }else if ("sendToStock".equals(action)) {
+                sendToStock(request, response);
             } else {
                 response.sendRedirect("ASNManagement?action=list");
             }
@@ -418,4 +420,104 @@ public class ASNManagementServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete ASN item: " + e.getMessage());
         }
     }
+
+    private void sendToStock(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int asnId = Integer.parseInt(request.getParameter("asnId"));
+            ASNDAO asnDao = new ASNDAO();
+            StockInDAO stockInDao = new StockInDAO();
+
+            // Get the ASN with its items
+            ASN asn = asnDao.getASNById(asnId);
+
+            if (asn == null) {
+                throw new ServletException("ASN not found");
+            }
+
+            if (!"approved".equalsIgnoreCase(asn.getStatus())) {
+                throw new ServletException("Only approved ASNs can be sent to stock");
+            }
+
+            // Start transaction
+            Connection connection = DBConnection.getConnection();
+            try {
+                connection.setAutoCommit(false);
+
+                // Create stock in record
+                int stockInId = stockInDao.insertMainStock(asn.getSupplierId(),
+                        new java.sql.Date(System.currentTimeMillis()),
+                        "pending");
+
+                if (stockInId <= 0) {
+                    throw new SQLException("Failed to create stock in record");
+                }
+
+                // Process each ASN item
+                for (ASNItem asnItem : asn.getItems()) {
+                    // Use the current expected_quantity which already accounts for incidents
+                    int quantityToStock = asnItem.getExpectedQuantity();
+
+                    if (quantityToStock > 0) {
+                        // Insert stock item
+                        int stockItemId = stockInDao.insertStockItem(stockInId,
+                                asnItem.getProductId(),
+                                quantityToStock,
+                                asnItem.getExpiryDate());
+
+                        if (stockItemId <= 0) {
+                            throw new SQLException("Failed to create stock item");
+                        }
+
+                        // Insert space management record (with default location)
+                        boolean spaceAdded = stockInDao.insertStockManage(stockItemId,
+                                1, // Default zone ID
+                                1, // Default rack ID
+                                quantityToStock,
+                                asnItem.getWeightId());
+
+                        if (!spaceAdded) {
+                            throw new SQLException("Failed to allocate space for stock item");
+                        }
+                    }
+                }
+
+                // Mark ASN as completed
+                if (!asnDao.completeASN(asnId)) {
+                    throw new SQLException("Failed to update ASN status");
+                }
+
+                // Commit transaction
+                connection.commit();
+
+                request.getSession().setAttribute("successMessage", "ASN items successfully sent to stock");
+                response.sendRedirect("ASNManagement?action=list");
+
+            } catch (SQLException e) {
+                // Rollback on error
+                if (connection != null) {
+                    try {
+                        connection.rollback();
+                    } catch (SQLException ex) {
+                        // Log rollback error
+                    }
+                }
+                throw new ServletException("Failed to process ASN: " + e.getMessage(), e);
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.setAutoCommit(true);
+                        connection.close();
+                    } catch (SQLException e) {
+                        // Log close error
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            request.getSession().setAttribute("errorMessage", "Error sending to stock: " + e.getMessage());
+            response.sendRedirect("ASNManagement?action=list");
+        }
+    }
+
+
 }

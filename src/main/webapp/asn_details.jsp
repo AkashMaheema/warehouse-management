@@ -111,6 +111,11 @@
                                         Reject ASN
                                     </button>
                                 </c:if>
+                                <c:if test="${asn.status == 'approved'}">
+                                    <button class="btn btn-info mb-2" onclick="sendToStock(${asn.asnId})">
+                                        Send To Stock Operation
+                                    </button>
+                                </c:if>
                                 <c:if test="${asn.status != 'pending'}">
                                     <div class="alert alert-info">
                                         This ASN has been ${asn.status.toLowerCase()}. No further actions available.
@@ -643,6 +648,40 @@ function updateUIAfterSave(supplierName, referenceNumber, expectedArrivalDate, r
             timer: 3000
         });
     }
+}
+function sendToStock(asnId) {
+    Swal.fire({
+        title: 'Send to Stock',
+        text: 'Are you sure you want to send these items to stock?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, send to stock'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('ASNManagement', {
+                action: 'sendToStock',
+                asnId: asnId
+            }).done(function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Items have been sent to stock',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload();
+                });
+            }).fail(function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseText || 'Failed to send items to stock'
+                });
+            });
+        }
+    });
 }
 
 

@@ -447,5 +447,15 @@ public class ASNDAO {
         }
     }
 
+    public boolean completeASN(int asnId) throws SQLException {
+        String sql = "UPDATE asn SET status = 'completed' WHERE asn_id = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, asnId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     // Remove the close() method as it's no longer needed
 }
