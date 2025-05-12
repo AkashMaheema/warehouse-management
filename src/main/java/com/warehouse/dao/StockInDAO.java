@@ -24,32 +24,6 @@ public class StockInDAO {
         }
     }
 
-    public List<Zone> getZoneList() {
-        List<Zone> list = new ArrayList<>();
-        String sql = "SELECT zone_id, zone_name FROM zones";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(new Zone(rs.getInt("zone_id"), rs.getString("zone_name")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public List<Rack> getRackList() {
-        List<Rack> list = new ArrayList<>();
-        String sql = "SELECT rack_id, rack_name FROM racks";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(new Rack(rs.getInt("rack_id"), rs.getString("rack_name")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     public int insertMainStock(int supplierId, Date arrivalDate, String status) throws SQLException {
         String sql = "INSERT INTO stock_in (supplier_id, arrival_date, status) VALUES (?, ?, ?)";
 

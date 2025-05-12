@@ -1,11 +1,7 @@
 package com.warehouse.controllers;
 
 import com.google.gson.Gson;
-import com.warehouse.dao.CategoryDAO;
-import com.warehouse.dao.ProductDAO;
-import com.warehouse.dao.SupplierDAO;
-import com.warehouse.dao.StockInDAO;
-import com.warehouse.dao.WeightDAO;
+import com.warehouse.dao.*;
 import com.warehouse.models.*;
 
 import javax.servlet.ServletException;
@@ -43,17 +39,21 @@ public class StockInServlet extends HttpServlet {
         CategoryDAO categoryDAO = new CategoryDAO();
         WeightDAO weightDAO = new WeightDAO();
         SupplierDAO supplierDAO = new SupplierDAO();
+        ZoneDAO zoneDAO = new ZoneDAO();
+        RacksDAO rackDAO = new RacksDAO();
 
         List<Product> products = productDAO.getAll();
         List<Category> categories = categoryDAO.getAll();
         List<Weight> weights = weightDAO.getAll();
         List<Supplier> suppliers = supplierDAO.getAll();
+        List<Rack> racks = rackDAO.getAll();
+        List<Zone>zones = zoneDAO.getAll();
 
         request.setAttribute("productList", products);
         request.setAttribute("categoryList", categories);
         request.setAttribute("weightList", weights);
-        request.setAttribute("zoneList", dao.getZoneList());
-        request.setAttribute("rackList", dao.getRackList());
+        request.setAttribute("zoneList", zones);
+        request.setAttribute("rackList", racks);
         request.setAttribute("supplierList", suppliers);
 
         Gson gson = new Gson();
@@ -75,6 +75,8 @@ public class StockInServlet extends HttpServlet {
             CategoryDAO categoryDAO = new CategoryDAO();
             WeightDAO weightDAO = new WeightDAO();
             SupplierDAO supplierDAO = new SupplierDAO();
+            ZoneDAO zoneDAO = new ZoneDAO();
+            RacksDAO rackDAO = new RacksDAO();
 
 //            // Create lookup maps
 //            Map<Integer, Product> productMap = new HashMap<>();
@@ -99,8 +101,8 @@ public class StockInServlet extends HttpServlet {
             request.setAttribute("productList", productDAO.getAll());
             request.setAttribute("categoryList", categoryDAO.getAll());
             request.setAttribute("weightList", weightDAO.getAll());
-            request.setAttribute("zoneList", dao.getZoneList());
-            request.setAttribute("rackList", dao.getRackList());
+            request.setAttribute("zoneList", zoneDAO.getAll());
+            request.setAttribute("rackList", rackDAO.getAll());
             request.setAttribute("supplierList", supplierDAO.getAll());
 
             Gson gson = new Gson();
