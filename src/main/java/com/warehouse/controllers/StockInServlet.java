@@ -1,32 +1,44 @@
 package com.warehouse.controllers;
 
+import com.google.gson.Gson;
 import com.warehouse.dao.CategoryDAO;
 import com.warehouse.dao.ProductDAO;
 import com.warehouse.dao.SupplierDAO;
 import com.warehouse.dao.StockInDAO;
 import com.warehouse.dao.WeightDAO;
-import com.warehouse.models.Category;
-import com.warehouse.models.Product;
-import com.warehouse.models.Supplier;
-import com.warehouse.models.StockIn;
-import com.warehouse.models.Weight;
+import com.warehouse.models.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.*;
 
 @WebServlet("/StockIn")
 public class StockInServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        StockInDAO dao = new StockInDAO();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
 
+        try {
+            if (action == null) {
+                // Show new stock form
+                showNewForm(request, response);
+            } else if ("view".equals(action)) {
+                viewStock(request, response);
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
+    }
+
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        StockInDAO dao = new StockInDAO();
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
         WeightDAO weightDAO = new WeightDAO();
@@ -44,7 +56,64 @@ public class StockInServlet extends HttpServlet {
         request.setAttribute("rackList", dao.getRackList());
         request.setAttribute("supplierList", suppliers);
 
-        request.getRequestDispatcher("stock_in.jsp").forward(request, response);  // your JSP file
+        Gson gson = new Gson();
+        request.setAttribute("productListJson", gson.toJson(products));
+        request.setAttribute("weightListJson", gson.toJson(weights));
+
+        request.getRequestDispatcher("stock_in.jsp").forward(request, response);
+    }
+
+    private void viewStock(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        int stockInId = Integer.parseInt(request.getParameter("id"));
+        StockInDAO dao = new StockInDAO();
+        StockIn stockIn = dao.getStockInById(stockInId);
+
+        if (stockIn != null) {
+
+            ProductDAO productDAO = new ProductDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
+            WeightDAO weightDAO = new WeightDAO();
+            SupplierDAO supplierDAO = new SupplierDAO();
+
+//            // Create lookup maps
+//            Map<Integer, Product> productMap = new HashMap<>();
+//            Map<Integer, Zone> zoneMap = new HashMap<>();
+//            Map<Integer, Rack> rackMap = new HashMap<>();
+//
+//            // Populate maps
+//            for (Product p : productDAO.getAll()) {
+//                productMap.put(p.getProductId(), p);
+//            }
+//            for (Zone z : zoneMap.getAll()) {
+//                zoneMap.put(z.getZoneId(), z);
+//            }
+//            for (Rack r : rackDAO.getAll()) {
+//                rackMap.put(r.getRackId(), r);
+//            }
+//            request.setAttribute("productMap", productMap);
+//            request.setAttribute("zoneMap", zoneMap);
+//            request.setAttribute("rackMap", rackMap);
+
+            request.setAttribute("stockIn", stockIn);
+            request.setAttribute("productList", productDAO.getAll());
+            request.setAttribute("categoryList", categoryDAO.getAll());
+            request.setAttribute("weightList", weightDAO.getAll());
+            request.setAttribute("zoneList", dao.getZoneList());
+            request.setAttribute("rackList", dao.getRackList());
+            request.setAttribute("supplierList", supplierDAO.getAll());
+
+            Gson gson = new Gson();
+            request.setAttribute("productListJson", gson.toJson(productDAO.getAll()));
+            request.setAttribute("weightListJson", gson.toJson(weightDAO.getAll()));
+            String stockInJson = gson.toJson(stockIn);
+            System.out.println("=== StockIn JSON ===");
+            System.out.println(stockInJson);
+            request.setAttribute("debugStockInJson", stockInJson);
+            request.getRequestDispatcher("stock_in.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("StockIn");
+        }
     }
 
 
@@ -52,7 +121,7 @@ public class StockInServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             // 1. Get main stock info (single record)
-            int supplierId = Integer.parseInt(request.getParameter("supplierid"));
+            int supplierId = Integer.parseInt(request.getParameter("supplierId"));
             Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
 
             // 2. Get all item details (multiple records)
@@ -116,7 +185,7 @@ public class StockInServlet extends HttpServlet {
 
             }
 
-            response.sendRedirect("StockInServlet");
+            response.sendRedirect("StockIn");
 
         } catch (Exception e) {
             e.printStackTrace();
