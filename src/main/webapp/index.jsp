@@ -40,6 +40,8 @@
             <li class="list-group-item"><a class="text-decoration-none" href="manageCategory">➕ Manage Category</a></li>
             <li class="list-group-item"><a class="text-decoration-none" href="manageWeights">➕ Manage Weight</a></li>
             <li class="list-group-item"><a class="text-decoration-none" href="manageProduct">➕ Manage Product</a></li>
+            <li class="list-group-item"><a class="text-decoration-none" href="manageSupplier">➕ Manage Supplier</a></li>
+            <li class="list-group-item"><a class="text-decoration-none" href="StockIn">➕ Add Supplies</a></li>
         </ul>
     </div>
 </div>

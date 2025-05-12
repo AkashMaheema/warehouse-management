@@ -46,3 +46,4 @@ public class Zone {
         this.usedCapacity = usedCapacity;
     }
 }
+
