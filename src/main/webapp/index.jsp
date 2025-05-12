@@ -44,6 +44,7 @@
             <li class="list-group-item"><a class="text-decoration-none" href="manageRacks">➕ Manage Racks</a></li>
             <li class="list-group-item"><a class="text-decoration-none" href="manageZone">➕ Manage Zone</a></li>
             <li class="list-group-item"><a class="text-decoration-none" href="StockIn">➕ Add Stock</a></li>
+            <li class="list-group-item"><a class="text-decoration-none" href="Stocks">➕ Pending Stock</a></li>
         </ul>
     </div>
 </div>
