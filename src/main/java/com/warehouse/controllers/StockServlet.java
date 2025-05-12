@@ -9,18 +9,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/PendingStocks")
-public class PendingStockServlet extends HttpServlet {
+@WebServlet("/Stocks")
+public class StockServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             StockInDAO stockInDAO = new StockInDAO();
-            List<StockIn> pendingStocks = stockInDAO.getPendingStocks();
+            List<StockIn> Stocks = stockInDAO.getStocks();
 
-            request.setAttribute("pendingStocks", pendingStocks);
-            request.getRequestDispatcher("pendingStock.jsp").forward(request, response);
+            request.setAttribute("Stocks", Stocks);
+            request.getRequestDispatcher("manageStock.jsp").forward(request, response);
 
         } catch (SQLException e) {
             throw new ServletException("Database error occurred", e);
@@ -47,7 +47,7 @@ public class PendingStockServlet extends HttpServlet {
                 }
             }
 
-            response.sendRedirect("PendingStocks");
+            response.sendRedirect("Stocks");
 
         } catch (SQLException e) {
             throw new ServletException("Database error occurred", e);

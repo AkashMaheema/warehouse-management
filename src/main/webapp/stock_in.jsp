@@ -31,10 +31,15 @@
     <div class="container mt-5">
         <h3>New Rice Stock Entry</h3>
         <form action="StockIn" method="post">
-        <c:if test="${not empty stockIn}">
-            <input type="hidden" name="stockInId" value="${stockIn.id}">
-            <input type="hidden" name="action" value="update">
-        </c:if>
+        <c:choose>
+            <c:when test="${not empty stockIn}">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="stockInId" value="${stockIn.id}">
+            </c:when>
+            <c:otherwise>
+                <input type="hidden" name="action" value="add">
+            </c:otherwise>
+        </c:choose>
             <div class="form-row mb-3">
                 <div class="col-md-4">
                     <label for="supplier_id">Supplier</label>
@@ -122,7 +127,7 @@
                                                         <td>
                                                             <input type="hidden" name="zoneid[]" class="zone-id" value="${item.zoneId}">
                                                             <input type="text" class="form-control zone-name"
-                                                                value="${zoneMap[item.zoneId].name}" readonly>
+                                                                value="${zoneMap[item.zoneId].zoneName}" readonly>
                                                             <button type="button" class="btn btn-sm btn-outline-primary mt-1 btn-select-zone">
                                                                 Select Zone
                                                             </button>
@@ -130,14 +135,14 @@
                                                         <td>
                                                             <input type="hidden" name="rackid[]" class="rack-id" value="${item.rackId}">
                                                             <input type="text" class="form-control rack-name"
-                                                                value="${rackMap[item.rackId].name}" readonly>
+                                                                value="${rackMap[item.rackId].rackName}" readonly>
                                                             <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-select-rack">
                                                                 Select Rack
                                                             </button>
                                                         </td>
                                                         <td>
                                                             <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
-                                                                <i class="fas fa-trash"></i>
+                                                                Remove
                                                             </button>
                                                         </td>
                                                     </tr>

@@ -16,7 +16,7 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h2>Pending Stock Approvals</h2>
+        <h2>Manage Stocks Approvals</h2>
 
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show">
@@ -37,25 +37,35 @@
                 </tr>
             </thead>
             <tbody>
-                <c:forEach items="${pendingStocks}" var="stock">
+                <c:forEach items="${Stocks}" var="stock">
                     <tr>
                         <td>${stock.id}</td>
                         <td>${stock.supplierName}</td>
                         <td>${stock.arrivalDate}</td>
                         <td>${stock.createdDate}</td>
+                        <td>${stock.status}</td>
+
                         <td class="action-btns">
-                            <a href="StockIn?action=view&id=${stock.id}" class="btn btn-sm btn-primary">View</a>
-                            <form action="PendingStocks" method="post" style="display: inline;">
-                                <input type="hidden" name="stockInId" value="${stock.id}">
-                                <input type="hidden" name="action" value="approve">
-                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
-                            </form>
-                            <form action="PendingStocks" method="post" style="display: inline;">
-                                <input type="hidden" name="stockInId" value="${stock.id}">
-                                <input type="hidden" name="action" value="reject">
-                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
-                            </form>
+                            <!-- View is always enabled -->
+                            <a href="StockIn?action=view&id=${stock.id}&disableUpdate=${stock.status != 'pending'}"
+                               class="btn btn-sm btn-primary">View</a>
+
+                            <!-- Show Approve and Reject buttons only if status is 'pending' -->
+                            <c:if test="${stock.status == 'pending'}">
+                                <form action="Stocks" method="post" style="display: inline;">
+                                    <input type="hidden" name="stockInId" value="${stock.id}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                </form>
+
+                                <form action="Stocks" method="post" style="display: inline;">
+                                    <input type="hidden" name="stockInId" value="${stock.id}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                </form>
+                            </c:if>
                         </td>
+
                     </tr>
                 </c:forEach>
             </tbody>
