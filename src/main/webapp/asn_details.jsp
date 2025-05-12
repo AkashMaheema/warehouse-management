@@ -111,18 +111,30 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
+                                        <th>Category</th>
                                         <th>Product</th>
                                         <th>Weight</th>
                                         <th>Quantity</th>
+                                        <th>Expire Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <c:forEach var="item" items="${asn.items}" varStatus="loop">
                                         <tr>
                                             <td>${loop.index + 1}</td>
+                                                        <td>
+                                                            <c:forEach var="cat" items="${categoryList}">
+                                                                <c:if test="${cat.categoryId == item.categoryId}">
+                                                                    ${cat.name}
+                                                                </c:if>
+                                                            </c:forEach>
+                                                        </td>
                                             <td>${item.product != null ? item.product.productName : 'N/A'}</td>
                                             <td>${item.weight != null ? item.weight.weightValue : 'N/A'} Kg</td>
                                             <td>${item.expectedQuantity}</td>
+                                            <td>
+                                                <fmt:formatDate value="${item.expiryDate}" pattern="yyyy-MM-dd" />
+                                            </td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>
@@ -149,7 +161,7 @@
                             <div class="col-md-6">
                                 <label for="supplierId" class="form-label">Supplier</label>
                                 <select class="form-select" id="supplierId" name="supplierId" required>
-                                    <c:forEach var="supplier" items="${suppliers}">
+                                    <c:forEach var="supplier" items="${supplierList}">
                                         <option value="${supplier.supplierId}" ${supplier.supplierId == asn.supplierId ? 'selected' : ''}>
                                             ${supplier.name}
                                         </option>
@@ -182,9 +194,11 @@
                                     <table class="table" id="itemsTable">
                                         <thead class="table-light">
                                             <tr>
+                                                <th>Category</th>
                                                 <th>Product</th>
                                                 <th>Weight (Kg)</th>
                                                 <th>Quantity</th>
+                                                <th>Product Expiry Date</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -192,8 +206,17 @@
                                             <c:forEach var="item" items="${asn.items}">
                                                 <tr data-item-id="${item.asnItemId}">
                                                     <td>
+                                                        <select class="form-select category-select" name="categoryId" required>
+                                                            <c:forEach var="category" items="${categoryList}">
+                                                                <option value="${category.categoryId}" ${category.categoryId == item.categoryId ? 'selected' : ''}>
+                                                                    ${category.name}
+                                                                </option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td>
                                                         <select class="form-select product-select" name="productId" required>
-                                                            <c:forEach var="product" items="${products}">
+                                                            <c:forEach var="product" items="${productList}">
                                                                 <option value="${product.productId}" ${product.productId == item.productId ? 'selected' : ''}>
                                                                     ${product.productName}
                                                                 </option>
@@ -202,7 +225,7 @@
                                                     </td>
                                                     <td>
                                                         <select class="form-select weight-select" name="weightId" required>
-                                                            <c:forEach var="weight" items="${weights}">
+                                                            <c:forEach var="weight" items="${weightList}">
                                                                 <option value="${weight.weightId}" ${weight.weightId == item.weightId ? 'selected' : ''}>
                                                                     ${weight.weightValue}
                                                                 </option>
@@ -213,9 +236,13 @@
                                                         <input type="number" class="form-control quantity-input"
                                                                name="expectedQuantity" value="${item.expectedQuantity}" min="1" required>
                                                     </td>
+                                                   <td>
+                                                       <input type="date" class="form-control expiry-date-input"
+                                                              name="expiryDate" value="<fmt:formatDate value="${item.expiryDate}" pattern="yyyy-MM-dd" />" required>
+                                                   </td>
                                                     <td>
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">
-                                                            <i class="bi bi-trash"></i>
+                                                            Delete
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -314,6 +341,13 @@
            const newRow = document.createElement('tr');
            newRow.innerHTML = `
                <td>
+                     <select class="form-select category-select" name="categoryId" required>
+                       <c:forEach var="category" items="${categoryList}">
+                           <option value="${category.categoryId}">${category.name}</option>
+                       </c:forEach>
+                    </select>
+               </td>
+               <td>
                    <select class="form-select product-select" name="productId" required>
                        <c:forEach var="product" items="${products}">
                            <option value="${product.productId}">${product.productName}</option>
@@ -331,9 +365,12 @@
                    <input type="number" class="form-control quantity-input"
                           name="expectedQuantity" value="1" min="1" required>
                </td>
+              <td>
+                  <input type="date" class="form-control expiry-date-input" name="expiryDate" required>
+              </td>
                <td>
                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)">
-                       <i class="bi bi-trash"></i>
+                       Delete
                    </button>
                </td>
            `;
@@ -345,92 +382,150 @@
            row.remove();
        }
 
-       function saveASNChanges() {
-           const form = document.getElementById('editASNForm');
-           if (!form.checkValidity()) {
-               form.reportValidity();
-               return;
-           }
+function saveASNChanges() {
+    const form = document.getElementById('editASNForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
 
-           // Create FormData object to collect all form data
-           const formData = new FormData();
-           formData.append('action', 'update');
-           formData.append('asnId', form.querySelector('input[name="asnId"]').value);
-           formData.append('supplierId', form.querySelector('#supplierId').value);
-           formData.append('referenceNumber', form.querySelector('#referenceNumber').value);
-           formData.append('expectedArrivalDate', form.querySelector('#expectedArrivalDate').value);
+    // Create form data with proper parameter names
+    const params = new URLSearchParams();
+    params.append('action', 'update');
+    params.append('asnId', form.querySelector('input[name="asnId"]').value);
+    params.append('supplierId', form.querySelector('#supplierId').value);
+    params.append('referenceNumber', form.querySelector('#referenceNumber').value);
+    params.append('expectedArrivalDate', form.querySelector('#expectedArrivalDate').value);
 
-           // Collect items data
-           const rows = document.querySelectorAll('#itemsTable tbody tr');
-           rows.forEach((row, index) => {
-               formData.append(`items[${index}].asnItemId`, row.dataset.itemId || '0'); // 0 for new items
-               formData.append(`items[${index}].productId`, row.querySelector('.product-select').value);
-               formData.append(`items[${index}].weightId`, row.querySelector('.weight-select').value);
-               formData.append(`items[${index}].expectedQuantity`, row.querySelector('.quantity-input').value);
-           });
+    // Collect all rows data for UI update
+    const rows = document.querySelectorAll('#itemsTable tbody tr');
 
-           Swal.fire({
-               title: 'Saving Changes',
-               text: 'Please wait while we save your changes...',
-               allowOutsideClick: false,
-               didOpen: () => {
-                   Swal.showLoading();
-               }
-           });
+    // Add items to form data
+    rows.forEach((row, index) => {
+        params.append(`items[${index}].asnItemId`, row.dataset.itemId || '0');
+        params.append(`items[${index}].categoryId`, row.querySelector('.category-select').value);
+        params.append(`items[${index}].productId`, row.querySelector('.product-select').value);
+        params.append(`items[${index}].weightId`, row.querySelector('.weight-select').value);
+        params.append(`items[${index}].expectedQuantity`, row.querySelector('.quantity-input').value);
+        params.append(`items[${index}].expiryDate`, row.querySelector('.expiry-date-input').value);
+    });
 
-           $.ajax({
-               url: 'ASNManagement',
-               type: 'POST',
-               data: formData,
-               processData: false,
-               contentType: false,
-               success: function(response) {
-                   Swal.fire({
-                       icon: 'success',
-                       title: 'Success',
-                       text: 'ASN updated successfully',
-                       timer: 1500,
-                       showConfirmButton: false
-                   }).then(() => {
-                       $('#editASNModal').modal('hide');
-                       // Update the page content without refresh
-                       updateASNDetails(response);
-                   });
-               },
-               error: function(xhr) {
-                   Swal.fire({
-                       icon: 'error',
-                       title: 'Error',
-                       text: 'Failed to update ASN: ' + (xhr.responseText || 'Unknown error')
-                   });
-               }
-           });
-       }
+    // Show loading alert
+    Swal.fire({
+        title: 'Saving Changes',
+        text: 'Please wait while we save your changes...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
 
-       function updateASNDetails(asnData) {
-           // Update the basic ASN info
-           document.querySelector('.card-header h4').textContent = `ASN Details - ASN-${asnData.asnId}`;
-           document.querySelector('.status-pending, .status-approved, .status-rejected').className = `status-${asnData.status.toLowerCase()}`;
-           document.querySelector('.status-pending, .status-approved, .status-rejected').textContent = asnData.status;
-           document.querySelector('dd:nth-of-type(2)').textContent = asnData.supplierName;
-           document.querySelector('dd:nth-of-type(3)').textContent = asnData.referenceNumber;
-           document.querySelector('dd:nth-of-type(4)').textContent = asnData.expectedArrivalDate;
+    // Send POST request
+    fetch('ASNManagement', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    })
+    .then(() => {
 
-           // Update the items table
-           const itemsTable = document.querySelector('.table-responsive table tbody');
-           itemsTable.innerHTML = '';
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'ASN updated successfully',
+            timer: 1500,
+            showConfirmButton: false
+        }).then(() => {
+            $('#editASNModal').modal('hide');
+            location.reload();
 
-           asnData.items.forEach((item, index) => {
-               const row = document.createElement('tr');
-               row.innerHTML = `
-                   <td>${index + 1}</td>
-                   <td>${item.productName}</td>
-                   <td>${item.weightValue} Kg</td>
-                   <td>${item.expectedQuantity}</td>
-               `;
-               itemsTable.appendChild(row);
-           });
-       }
+        });
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to update ASN: ' + (error.message || 'Unknown error')
+        });
+        console.error('Error:', error);
+    });
+}
+
+function updateUIAfterSave(supplierName, referenceNumber, expectedArrivalDate, rows) {
+    try {
+        // 1. Update Basic Information
+        document.querySelector('dl.row dd:nth-of-type(2)').textContent = supplierName;
+        document.querySelector('dl.row dd:nth-of-type(3)').textContent = referenceNumber;
+        document.querySelector('dl.row dd:nth-of-type(4)').textContent = expectedArrivalDate;
+
+        // 2. Update Items Table
+        const itemsTableBody = document.querySelector('.table-responsive table tbody');
+        if (itemsTableBody) {
+            itemsTableBody.innerHTML = '';
+
+            // Create lookup maps for category/product/weight names from the modal
+            const categoryMap = {};
+            document.querySelectorAll('.category-select option').forEach(opt => {
+                categoryMap[opt.value] = opt.textContent;
+            });
+
+            const productMap = {};
+            document.querySelectorAll('.product-select option').forEach(opt => {
+                productMap[opt.value] = opt.textContent;
+            });
+
+            const weightMap = {};
+            document.querySelectorAll('.weight-select option').forEach(opt => {
+                weightMap[opt.value] = opt.textContent;
+            });
+
+            // Corrected part of updateUIAfterSave function:
+            rows.forEach((row, index) => {
+                const categoryId = row.querySelector('.category-select').value;
+                const productId = row.querySelector('.product-select').value;
+                const weightId = row.querySelector('.weight-select').value;
+                const quantity = row.querySelector('.quantity-input').value;
+                const expiryDate = row.querySelector('.expiry-date-input').value;
+
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${categoryMap[categoryId] || 'N/A'}</td>
+                    <td>${productMap[productId] || 'N/A'}</td>
+                    <td>${weightMap[weightId] || 'N/A'}${weightMap[weightId] ? ' Kg' : ''}</td>
+                    <td>${quantity}</td>
+                    <td>${expiryDate}</td>
+                `;
+                itemsTableBody.appendChild(newRow);
+            });
+
+
+            // Update the items count in the card header
+            const itemsCountElement = document.querySelector('.card-header h5.mb-0');
+            if (itemsCountElement) {
+                itemsCountElement.textContent = `ASN Items (${rows.length})`;
+            }
+        }
+    } catch (error) {
+        console.error('Error updating UI:', error);
+        Swal.fire({
+            icon: 'warning',
+            title: 'Display Update Incomplete',
+            text: 'Changes were saved successfully, but some display elements might not update. Please refresh if needed.',
+            timer: 3000
+        });
+    }
+}
+
+
+
     </script>
 </body>
 </html>

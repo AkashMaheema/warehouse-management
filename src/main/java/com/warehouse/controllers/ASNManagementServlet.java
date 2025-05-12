@@ -1,14 +1,7 @@
 package com.warehouse.controllers;
 
-import com.warehouse.dao.ASNDAO;
-import com.warehouse.dao.ProductDAO;
-import com.warehouse.dao.SupplierDAO;
-import com.warehouse.dao.WeightDAO;
-import com.warehouse.models.ASN;
-import com.warehouse.models.ASNItem;
-import com.warehouse.models.Product;
-import com.warehouse.models.Supplier;
-import com.warehouse.models.Weight;
+import com.warehouse.dao.*;
+import com.warehouse.models.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,9 +10,19 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
 import java.net.URLEncoder;
+import java.sql.Date;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.HashSet;
+
+
+
+
 
 
 @WebServlet("/ASNManagement")
@@ -75,16 +78,20 @@ public class ASNManagementServlet extends HttpServlet {
             ProductDAO productDao = new ProductDAO();
             SupplierDAO supplierDao = new SupplierDAO();
             WeightDAO weightDao = new WeightDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
 
             List<ASN> asnList = asnDao.getAllASNs();
             List<Product> products = productDao.getAll();
             List<Supplier> suppliers = supplierDao.getAll();
             List<Weight> weights = weightDao.getAll();
+            List<Category> categories = categoryDAO.getAll();
+
 
             request.setAttribute("asnList", asnList);
             request.setAttribute("products", products);
             request.setAttribute("suppliers", suppliers);
             request.setAttribute("weights", weights);
+            request.setAttribute("categoryList", categories);
 
             request.getRequestDispatcher("asn_management.jsp").forward(request, response);
         } catch (Exception e) {
@@ -94,7 +101,26 @@ public class ASNManagementServlet extends HttpServlet {
 
     private void viewASNDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // Initialize DAOs
+            ProductDAO productDAO = new ProductDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
+            WeightDAO weightDAO = new WeightDAO();
+            SupplierDAO supplierDAO = new SupplierDAO();
+
+            // Fetch lists of products, categories, weights, and suppliers to set them as attributes
+            List<Product> products = productDAO.getAll();
+            List<Category> categories = categoryDAO.getAll();
+            List<Weight> weights = weightDAO.getAll();
+            List<Supplier> suppliers = supplierDAO.getAll();
+
+            request.setAttribute("productList", products);
+            request.setAttribute("categoryList", categories);
+            request.setAttribute("weightList", weights);
+            request.setAttribute("supplierList", suppliers);
+
+            // Get ASN ID from request parameters
             int asnId = Integer.parseInt(request.getParameter("asnId"));
+
             ASNDAO asnDao = new ASNDAO();
             ASN asn = asnDao.getASNById(asnId);
 
@@ -102,12 +128,47 @@ public class ASNManagementServlet extends HttpServlet {
                 throw new ServletException("ASN not found");
             }
 
+            // Mapping ASN details (already done by your DAO)
             request.setAttribute("asn", asn);
-            request.getRequestDispatcher("asn_details.jsp").forward(request, response);
+
+            // Mapping ASN items from the form
+            List<ASNItem> items = new ArrayList<>();
+            int index = 0;
+
+            while (request.getParameter("items[" + index + "].productId") != null) {
+                ASNItem item = new ASNItem();
+
+                // Map ASN Item fields from the request
+                item.setAsnItemId(Integer.parseInt(request.getParameter("items[" + index + "].asnItemId")));
+                item.setProductId(Integer.parseInt(request.getParameter("items[" + index + "].productId")));
+                item.setWeightId(Integer.parseInt(request.getParameter("items[" + index + "].weightId")));
+                item.setExpectedQuantity(Integer.parseInt(request.getParameter("items[" + index + "].expectedQuantity")));
+                item.setCategoryId(Integer.parseInt(request.getParameter("items[" + index + "].categoryId")));
+                item.setExpiryDate(Date.valueOf(request.getParameter("items[" + index + "].expiryDate")));
+
+                // Add to the list of items
+                items.add(item);
+                index++;
+            }
+
+            // Call DAO method to update ASN and its items
+            boolean success = asnDao.updateASNWithItems(asn, items);
+
+            if (success) {
+                // If successful, redirect to a success page or return the updated ASN to the JSP
+                request.setAttribute("message", "ASN and items updated successfully!");
+                request.getRequestDispatcher("asn_details.jsp").forward(request, response);
+            } else {
+                // If update fails, set error message
+                request.setAttribute("message", "Failed to update ASN and items.");
+                request.getRequestDispatcher("asn_details.jsp").forward(request, response);
+            }
+
         } catch (Exception e) {
             throw new ServletException("Failed to view ASN details: " + e.getMessage(), e);
         }
     }
+
 
     private void getASNDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -163,7 +224,9 @@ public class ASNManagementServlet extends HttpServlet {
         try {
             int supplierId = Integer.parseInt(request.getParameter("supplierId"));
             String referenceNumber = request.getParameter("referenceNumber");
-            Date expectedArrivalDate = dateFormat.parse(request.getParameter("expectedArrivalDate"));
+            Date expectedArrivalDate = Date.valueOf(request.getParameter("expectedArrivalDate"));
+//            Date expiryDate = dateFormat.parse(request.getParameter("expiryDate"));
+//            int categoryId = Integer.parseInt(request.getParameter("categoryId"));
 
             ASN asn = new ASN();
             asn.setSupplierId(supplierId);
@@ -175,6 +238,8 @@ public class ASNManagementServlet extends HttpServlet {
             String[] productIds = request.getParameterValues("productId");
             String[] weightIds = request.getParameterValues("weightId");
             String[] quantities = request.getParameterValues("quantity");
+            String[] categoryIds = request.getParameterValues("categoryId");
+            String[] expiry_dates = request.getParameterValues("expiryDate");
 
             if (productIds == null || productIds.length == 0) {
                 throw new ServletException("At least one item is required");
@@ -185,6 +250,8 @@ public class ASNManagementServlet extends HttpServlet {
                 item.setProductId(Integer.parseInt(productIds[i]));
                 item.setWeightId(Integer.parseInt(weightIds[i]));
                 item.setExpectedQuantity(Integer.parseInt(quantities[i]));
+                item.setCategoryId(Integer.parseInt(categoryIds[i]));
+                item.setExpiryDate(Date.valueOf(expiry_dates[i]));
                 items.add(item);
             }
 
@@ -198,7 +265,7 @@ public class ASNManagementServlet extends HttpServlet {
             }
 
             response.sendRedirect("ASNManagement?action=list");
-        } catch (ParseException e) {
+        } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("errorMessage", "Invalid date format. Please use YYYY-MM-DD");
             response.sendRedirect("ASNManagement?action=list");
         } catch (Exception e) {
@@ -262,10 +329,11 @@ public class ASNManagementServlet extends HttpServlet {
 
     private void updateASN(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // Parse basic ASN data
             int asnId = Integer.parseInt(request.getParameter("asnId"));
             int supplierId = Integer.parseInt(request.getParameter("supplierId"));
             String referenceNumber = request.getParameter("referenceNumber");
-            Date expectedArrivalDate = dateFormat.parse(request.getParameter("expectedArrivalDate"));
+            Date expectedArrivalDate = Date.valueOf(request.getParameter("expectedArrivalDate"));
 
             ASN asn = new ASN();
             asn.setAsnId(asnId);
@@ -275,52 +343,34 @@ public class ASNManagementServlet extends HttpServlet {
 
             List<ASNItem> items = new ArrayList<>();
 
-            // Parse items from request
-            int index = 0;
-            while (request.getParameter("items[" + index + "].productId") != null) {
-                ASNItem item = new ASNItem();
-                item.setAsnItemId(Integer.parseInt(request.getParameter("items[" + index + "].asnItemId")));
-                item.setProductId(Integer.parseInt(request.getParameter("items[" + index + "].productId")));
-                item.setWeightId(Integer.parseInt(request.getParameter("items[" + index + "].weightId")));
-                item.setExpectedQuantity(Integer.parseInt(request.getParameter("items[" + index + "].expectedQuantity")));
-                items.add(item);
-                index++;
+            // Handle items with empty bracket format []
+            String[] asnItemIds = request.getParameterValues("items[].asnItemId");
+            if (asnItemIds != null) {
+                for (int i = 0; i < asnItemIds.length; i++) {
+                    ASNItem item = new ASNItem();
+                    item.setAsnItemId(Integer.parseInt(asnItemIds[i]));
+                    item.setProductId(Integer.parseInt(request.getParameterValues("items[].productId")[i]));
+                    item.setWeightId(Integer.parseInt(request.getParameterValues("items[].weightId")[i]));
+                    item.setExpectedQuantity(Integer.parseInt(request.getParameterValues("items[].expectedQuantity")[i]));
+                    item.setCategoryId(Integer.parseInt(request.getParameterValues("items[].categoryId")[i]));
+                    item.setExpiryDate(Date.valueOf(request.getParameterValues("items[].expiryDate")[i]));
+                    items.add(item);
+                }
             }
 
+            // Use DAO to update
             ASNDAO asnDao = new ASNDAO();
             boolean success = asnDao.updateASNWithItems(asn, items);
 
             if (success) {
-                // Get updated ASN data to return
-                ASN updatedASN = asnDao.getASNById(asnId);
-                SupplierDAO supplierDao = new SupplierDAO();
-                Supplier supplier = supplierDao.getSupplierById(updatedASN.getSupplierId());
-
-                // Prepare response data
-                StringBuilder responseData = new StringBuilder();
-                responseData.append("asnId=").append(updatedASN.getAsnId())
-                        .append("&status=").append(updatedASN.getStatus())
-                        .append("&supplierName=").append(supplier != null ? URLEncoder.encode(supplier.getName(), "UTF-8") : "N/A")
-                        .append("&referenceNumber=").append(URLEncoder.encode(updatedASN.getReferenceNumber(), "UTF-8"))
-                        .append("&expectedArrivalDate=").append(dateFormat.format(updatedASN.getExpectedArrivalDate()));
-
-                // Add items data
-                for (ASNItem item : updatedASN.getItems()) {
-                    responseData.append("&items=").append(URLEncoder.encode(
-                            (item.getProduct() != null ? item.getProduct().getProductName() : "N/A") + "," +
-                                    (item.getWeight() != null ? item.getWeight().getWeightValue() : "N/A") + "," +
-                                    item.getExpectedQuantity(), "UTF-8"));
-                }
-
                 response.setContentType("text/plain");
-                response.getWriter().write(responseData.toString());
+                response.getWriter().write("success");
             } else {
-                throw new ServletException("Failed to update ASN");
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update ASN");
             }
-        } catch (ParseException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid date format");
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update ASN: " + e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
