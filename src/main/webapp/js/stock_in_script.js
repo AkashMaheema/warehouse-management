@@ -108,9 +108,69 @@
 
             $('#rackModal').modal('hide');
         });
+$(document).ready(function () {
+            // Product form submission
+            $('#addFormProduct').submit(function (e) {
+                e.preventDefault();
 
-    function addRow() {
+                $.ajax({
+                    url: 'manageProduct',
+                    method: 'POST',
+                    data: $(this).serialize() + '&action=create',
+                    dataType: 'json', // Force JSON parsing
+                    success: function (newProduct) {
+                        $('.product-select').each(function () {
+                            $(this).append(
+                                $('<option>', {
+                                    value: newProduct.productId,
+                                    text: newProduct.productName
+                                })
+                            );
+                        });
+                        $('#addFormProduct')[0].reset();
+                        $('#addModalProduct').modal('hide');
+                    },
+                    error: function (xhr) {
+                                            console.error("AJAX error:", xhr.responseText);
+                                            alert("Failed to add supplier.");
+                    }
+                });
+            });
+
+            // Supplier form submission
+            $('#addFormSupplier').submit(function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: 'manageSupplier',
+                    method: 'POST',
+                    data: $(this).serialize() + '&action=create',
+                    dataType: 'json',
+                    success: function (newSupplier) {
+                        // Find all the supplier select elements and add the new supplier option dynamically
+                        $('.supplier-select').each(function () {
+                            $(this).append(
+                                $('<option>', {
+                                    value: newSupplier.supplierId,
+                                    text: newSupplier.name
+                                })
+                            );
+                        });
+
+                        // Reset the form and hide the modal
+                        $('#addFormSupplier')[0].reset();
+                        $('#addModalSupplier').modal('hide');
+
+                    },
+                    error: function (xhr) {
+                        console.error("AJAX error:", xhr.responseText);
+                        alert("Failed to add supplier.");
+                    }
+                });
+            });
+        });
+function addRow() {
         var newRow = $('#stockTableBody tr:first').clone();
         newRow.find('input, select').val('');
         $('#stockTableBody').append(newRow);
-    }
+}

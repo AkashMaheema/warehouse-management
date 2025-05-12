@@ -6,11 +6,12 @@ public class StockItem {
     private int id;
     private int stockInId;
     private int productId;
+    private int categoryId;
+    private int weightId;
     private int quantity;
     private int zoneId;
     private int rackId;
     private Date expireDate;
-
     // Default constructor
     public StockItem() {
     }
@@ -71,5 +72,21 @@ public class StockItem {
 
     public void setExpireDate(Date expireDate) {
         this.expireDate = expireDate;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public int getWeightId() {
+        return weightId;
+    }
+
+    public void setWeightId(int weightId) {
+        this.weightId = weightId;
     }
 }
