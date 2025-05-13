@@ -241,5 +241,19 @@ public class StockInDAO {
             ps.executeUpdate();
         }
     }
+    public boolean insertIntoInventory(int stockInId) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        String query = "INSERT INTO inventory (product_id, zone_id, rack_id, quantity, expiry_date, arrival_date, holding_time) " +
+                "SELECT sci.product_id, sm.zone_id, sm.rack_id, sci.quantity, sci.expiry_date, si.arrival_date, " +
+                "DATEDIFF(CURDATE(), si.arrival_date) as holding_time " +
+                "FROM stock_contain_items sci " +
+                "JOIN stock_in si ON sci.stockin_id = si.stockin_id " +
+                "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                "WHERE sci.stockin_id = ?";
 
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, stockInId);
+            return ps.executeUpdate() > 0;
+        }
+    }
 }
