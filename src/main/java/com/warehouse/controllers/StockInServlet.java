@@ -1,61 +1,135 @@
 package com.warehouse.controllers;
 
-import com.warehouse.dao.CategoryDAO;
-import com.warehouse.dao.ProductDAO;
-import com.warehouse.dao.SupplierDAO;
-import com.warehouse.dao.StockInDAO;
-import com.warehouse.dao.WeightDAO;
-import com.warehouse.models.Category;
-import com.warehouse.models.Product;
-import com.warehouse.models.Supplier;
-import com.warehouse.models.StockIn;
-import com.warehouse.models.Weight;
+import com.google.gson.Gson;
+import com.warehouse.dao.*;
+import com.warehouse.models.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.*;
 
 @WebServlet("/StockIn")
 public class StockInServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        StockInDAO dao = new StockInDAO();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        System.out.println(action);
+        try {
+            if (action == null) {
+                // Show new stock form
+                showNewForm(request, response);
+            } else if ("view".equals(action)) {
+                viewStock(request, response);
+            } else if ("updated".equals(action) || "added".equals(action) ) {
+                request.setAttribute("successMessage", "Stock successfully " + action + "!");
+                request.getRequestDispatcher("manageStock.jsp").forward(request, response);
+//                response.sendRedirect("PendingStocks");
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
+    }
 
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        StockInDAO dao = new StockInDAO();
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
         WeightDAO weightDAO = new WeightDAO();
         SupplierDAO supplierDAO = new SupplierDAO();
+        ZoneDAO zoneDAO = new ZoneDAO();
+        RacksDAO rackDAO = new RacksDAO();
 
         List<Product> products = productDAO.getAll();
         List<Category> categories = categoryDAO.getAll();
         List<Weight> weights = weightDAO.getAll();
         List<Supplier> suppliers = supplierDAO.getAll();
+        List<Rack> racks = rackDAO.getAll();
+        List<Zone>zones = zoneDAO.getAll();
 
         request.setAttribute("productList", products);
         request.setAttribute("categoryList", categories);
         request.setAttribute("weightList", weights);
-        request.setAttribute("zoneList", dao.getZoneList());
-        request.setAttribute("rackList", dao.getRackList());
+        request.setAttribute("zoneList", zones);
+        request.setAttribute("rackList", racks);
         request.setAttribute("supplierList", suppliers);
 
-        request.getRequestDispatcher("stock_in.jsp").forward(request, response);  // your JSP file
+        Gson gson = new Gson();
+        request.setAttribute("productListJson", gson.toJson(products));
+        request.setAttribute("weightListJson", gson.toJson(weights));
+
+        request.getRequestDispatcher("stock_in.jsp").forward(request, response);
+    }
+
+    private void viewStock(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        int stockInId = Integer.parseInt(request.getParameter("id"));
+        StockInDAO dao = new StockInDAO();
+        StockIn stockIn = dao.getStockInById(stockInId);
+
+        if (stockIn != null) {
+
+            ProductDAO productDAO = new ProductDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
+            WeightDAO weightDAO = new WeightDAO();
+            SupplierDAO supplierDAO = new SupplierDAO();
+            ZoneDAO zoneDAO = new ZoneDAO();
+            RacksDAO rackDAO = new RacksDAO();
+
+            // Create lookup maps
+            Map<Integer, Product> productMap = new HashMap<>();
+            Map<Integer, Zone> zoneMap = new HashMap<>();
+            Map<Integer, Rack> rackMap = new HashMap<>();
+
+            // Populate maps
+            for (Product p : productDAO.getAll()) {
+                productMap.put(p.getProductId(), p);
+            }
+            for (Zone z : zoneDAO.getAll()) {
+                zoneMap.put(z.getZoneId(), z);
+            }
+            for (Rack r : rackDAO.getAll()) {
+                rackMap.put(r.getRackId(), r);
+            }
+            request.setAttribute("productMap", productMap);
+            request.setAttribute("zoneMap", zoneMap);
+            request.setAttribute("rackMap", rackMap);
+
+            request.setAttribute("stockIn", stockIn);
+            request.setAttribute("productList", productDAO.getAll());
+            request.setAttribute("categoryList", categoryDAO.getAll());
+            request.setAttribute("weightList", weightDAO.getAll());
+            request.setAttribute("zoneList", zoneDAO.getAll());
+            request.setAttribute("rackList", rackDAO.getAll());
+            request.setAttribute("supplierList", supplierDAO.getAll());
+
+            Gson gson = new Gson();
+            request.setAttribute("productListJson", gson.toJson(productDAO.getAll()));
+            request.setAttribute("weightListJson", gson.toJson(weightDAO.getAll()));
+            request.getRequestDispatcher("stock_in.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("StockIn");
+        }
     }
 
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // 1. Get main stock info (single record)
-            int supplierId = Integer.parseInt(request.getParameter("supplierid"));
-            Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
+            String action = request.getParameter("action");
+            System.out.println("Action: " + action);
 
-            // 2. Get all item details (multiple records)
+            int supplierId = Integer.parseInt(request.getParameter("supplierId"));
+            Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
+            String status = "pending";
+
+            // Stock item arrays
             String[] productIds = request.getParameterValues("productId[]");
             String[] quantities = request.getParameterValues("quantity[]");
             String[] expireDates = request.getParameterValues("expire_date[]");
@@ -63,26 +137,38 @@ public class StockInServlet extends HttpServlet {
             String[] rackIds = request.getParameterValues("rackid[]");
             String[] weightIds = request.getParameterValues("weightId[]");
             String[] categoryIds = request.getParameterValues("categoryId[]");
-            String status = "pending";
 
-            // Validate all arrays have same length
             if (!allArraysSameLength(productIds, quantities, expireDates, zoneIds, rackIds)) {
                 throw new ServletException("Invalid form data: arrays have different lengths");
             }
 
-            // 3. Create and insert the main stock record
             StockInDAO dao = new StockInDAO();
-            int stockInId = dao.insertMainStock(supplierId, arrivalDate, status);
+            int stockInId;
 
-            // 4. Insert all items
+            if ("update".equalsIgnoreCase(action)) {
+                // Get existing stockInId from request
+                stockInId = Integer.parseInt(request.getParameter("stockInId"));
+                boolean updated = dao.updateMainStock(stockInId, supplierId, arrivalDate, status);
+
+                if (!updated) {
+                    throw new SQLException("Failed to update stock_in record");
+                }
+
+                // Delete existing stock items and management entries before re-inserting
+                dao.deleteStockItemsByStockInId(stockInId);
+
+            } else {
+                // Create new stock_in record
+                stockInId = dao.insertMainStock(supplierId, arrivalDate, status);
+            }
+
             boolean allItemsInserted = true;
+
             for (int i = 0; i < productIds.length; i++) {
                 int stockContainId = dao.insertStockItem(
                         stockInId,
                         Integer.parseInt(productIds[i]),
                         Integer.parseInt(quantities[i]),
-//                        Integer.parseInt(zoneIds[i]),
-//                        Integer.parseInt(rackIds[i]),
                         Date.valueOf(expireDates[i])
                 );
 
@@ -105,18 +191,13 @@ public class StockInServlet extends HttpServlet {
                 }
             }
 
-
-            // 5. Handle result
             if (allItemsInserted) {
-                request.getSession().setAttribute("successMessage", "Stock successfully added!");
+                request.getSession().setAttribute("successMessage", "Stock successfully " + (action.equals("update") ? "updated" : "added") + "!");
+                response.sendRedirect("Stocks?action=" + (action.equals("update") ? "updated" : "added"));
             } else {
-                // Rollback if any item failed
                 request.getSession().setAttribute("errorMessage", "Failed to add some stock items");
                 request.getRequestDispatcher("error.jsp").forward(request, response);
-
             }
-
-            response.sendRedirect("StockInServlet");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,6 +205,7 @@ public class StockInServlet extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
+
 
     private boolean allArraysSameLength(String[]... arrays) {
         if (arrays.length == 0) return true;

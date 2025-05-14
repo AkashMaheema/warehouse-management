@@ -76,4 +76,27 @@ public class ZoneDAO {
 
         return list;
     }
+
+    public void updateZoneUsedCapacity(int zoneId) {
+        int totalUsed = 0;
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "SELECT SUM(used_capacity) FROM racks WHERE zone_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, zoneId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    totalUsed = rs.getInt(1);
+                }
+            }
+
+            String update = "UPDATE zones SET used_capacity = ? WHERE zone_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(update)) {
+                ps.setInt(1, totalUsed);
+                ps.setInt(2, zoneId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
