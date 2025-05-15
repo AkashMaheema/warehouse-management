@@ -4,8 +4,6 @@
 <%@ page import="com.warehouse.dao.CategoryDAO" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-
-
 <html>
 <head>
     <title>Manage Categories</title>
