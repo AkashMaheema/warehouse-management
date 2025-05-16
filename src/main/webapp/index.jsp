@@ -1,6 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*, com.warehouse.config.DBConnection" %>
 <%@ page import="java.util.*" %>
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="dashboard" />
+    <jsp:param name="activePage" value="index" />
+    <jsp:param name="content" value="index" />
+</jsp:include>
 <%
     Connection conn = DBConnection.getConnection();
     int productCount = 0, lowStockCount = 0;
@@ -18,8 +23,14 @@
     <meta charset="UTF-8">
     <title>Warehouse Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+         margin-top: var(--header-height);
+         margin-left: var(--sidebar-width);
+         padding: 20px;
+    </style>
 </head>
 <body>
+<div id="content">
 <div class="container mt-4">
     <h2 class="mb-4">📦 Araliya Warehouse Dashboard</h2>
     <div class="row">
@@ -48,5 +59,7 @@
         </ul>
     </div>
 </div>
+</div>
 </body>
 </html>
+

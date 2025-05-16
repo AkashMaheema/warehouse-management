@@ -1,10 +1,21 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="com.warehouse.models.Category" %>
+<%@ page import="com.warehouse.dao.CategoryDAO" %>
+
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="manageStock" />
+    <jsp:param name="activePage" value="manageStock" />
+    <jsp:param name="content" value="manageStock" />
+</jsp:include>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Pending Stock Approvals</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+     <link rel="stylesheet" href="css/style.css">
     <style>
         .table-hover tbody tr:hover {
             background-color: #f5f5f5;
@@ -15,8 +26,8 @@
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2>Manage Stocks Approvals</h2>
+    <div class="container">
+            <h2 class="category-heading">Stock Approvals</h2>
 
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show">
@@ -26,6 +37,7 @@
             <c:remove var="successMessage" scope="session"/>
         </c:if>
 
+        <div class="table-container">
         <table class="table table-bordered table-hover">
             <thead class="table-light">
                 <tr>
@@ -33,7 +45,8 @@
                     <th>Supplier</th>
                     <th>Arrival Date</th>
                     <th>Created Date</th>
-                    <th>Actions</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,6 +83,7 @@
                 </c:forEach>
             </tbody>
         </table>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
