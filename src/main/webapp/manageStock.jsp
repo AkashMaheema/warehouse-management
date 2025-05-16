@@ -18,6 +18,9 @@
     <div class="container mt-4">
         <h2>Manage Stocks Approvals</h2>
 
+     <a class="btn btn-primary mb-3 text-decoration-none" href="StockIn">Add Stock</a>
+
+
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show">
                 ${successMessage}
@@ -46,9 +49,13 @@
                         <td>${stock.status}</td>
 
                         <td class="action-btns">
-                            <!-- View is always enabled -->
-                            <a href="StockIn?action=view&id=${stock.id}&disableUpdate=${stock.status != 'pending'}"
-                               class="btn btn-sm btn-primary">View</a>
+                            <!-- Always show View button, using POST -->
+                                <form action="StockIn" method="post" style="display: inline;">
+                                    <input type="hidden" name="action" value="view">
+                                    <input type="hidden" name="id" value="${stock.id}">
+                                    <input type="hidden" name="disableUpdate" value="${stock.status != 'pending'}">
+                                    <button type="submit" class="btn btn-sm btn-primary">View</button>
+                                </form>
 
                             <!-- Show Approve and Reject buttons only if status is 'pending' -->
                             <c:if test="${stock.status == 'pending'}">
@@ -65,7 +72,6 @@
                                 </form>
                             </c:if>
                         </td>
-
                     </tr>
                 </c:forEach>
             </tbody>
