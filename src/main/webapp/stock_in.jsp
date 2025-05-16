@@ -49,7 +49,7 @@
             <c:otherwise>
                 <input type="hidden" name="action" value="add">
             </c:otherwise>
-        </c:choose>
+        </c:choose> 
             <div class="form-row mb-3">
                 <div class="col-md-4">
                     <label for="supplier_id">Supplier</label>
@@ -219,7 +219,10 @@
                             </div>
                         </div>
                         <div class="text-center mb-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-lg"
+                                <c:if test="${disableUpdate}">disabled</c:if>>
                                 <c:choose>
                                     <c:when test="${not empty stockIn}">
                                         Update Stock

@@ -19,7 +19,6 @@ public class StockInServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        System.out.println(action);
         try {
             if (action == null) {
                 // Show new stock form
@@ -70,6 +69,9 @@ public class StockInServlet extends HttpServlet {
     private void viewStock(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         int stockInId = Integer.parseInt(request.getParameter("id"));
+        System.out.println(stockInId);
+        String disableUpdate = request.getParameter("disableUpdate");
+
         StockInDAO dao = new StockInDAO();
         StockIn stockIn = dao.getStockInById(stockInId);
 
@@ -108,10 +110,15 @@ public class StockInServlet extends HttpServlet {
             request.setAttribute("zoneList", zoneDAO.getAll());
             request.setAttribute("rackList", rackDAO.getAll());
             request.setAttribute("supplierList", supplierDAO.getAll());
+            request.setAttribute("disableUpdate", disableUpdate);
+
 
             Gson gson = new Gson();
             request.setAttribute("productListJson", gson.toJson(productDAO.getAll()));
+            System.out.println(gson.toJson(productDAO.getAll()) );
             request.setAttribute("weightListJson", gson.toJson(weightDAO.getAll()));
+            System.out.println(gson.toJson(stockIn));
+
             request.getRequestDispatcher("stock_in.jsp").forward(request, response);
         } else {
             response.sendRedirect("StockIn");
@@ -121,88 +128,96 @@ public class StockInServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            String action = request.getParameter("action");
-            System.out.println("Action: " + action);
-
-            int supplierId = Integer.parseInt(request.getParameter("supplierId"));
-            Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
-            String status = "pending";
-
-            // Stock item arrays
-            String[] productIds = request.getParameterValues("productId[]");
-            String[] quantities = request.getParameterValues("quantity[]");
-            String[] expireDates = request.getParameterValues("expire_date[]");
-            String[] zoneIds = request.getParameterValues("zoneid[]");
-            String[] rackIds = request.getParameterValues("rackid[]");
-            String[] weightIds = request.getParameterValues("weightId[]");
-            String[] categoryIds = request.getParameterValues("categoryId[]");
-
-            if (!allArraysSameLength(productIds, quantities, expireDates, zoneIds, rackIds)) {
-                throw new ServletException("Invalid form data: arrays have different lengths");
+        String action = request.getParameter("action");
+        if ("view".equals(action)) {
+            try {
+                viewStock(request, response);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
+        }
+        else {
+            try {
 
-            StockInDAO dao = new StockInDAO();
-            int stockInId;
+                int supplierId = Integer.parseInt(request.getParameter("supplierId"));
+                Date arrivalDate = Date.valueOf(request.getParameter("arrival_date"));
+                String status = "pending";
 
-            if ("update".equalsIgnoreCase(action)) {
-                // Get existing stockInId from request
-                stockInId = Integer.parseInt(request.getParameter("stockInId"));
-                boolean updated = dao.updateMainStock(stockInId, supplierId, arrivalDate, status);
+                // Stock item arrays
+                String[] productIds = request.getParameterValues("productId[]");
+                String[] quantities = request.getParameterValues("quantity[]");
+                String[] expireDates = request.getParameterValues("expire_date[]");
+                String[] zoneIds = request.getParameterValues("zoneid[]");
+                String[] rackIds = request.getParameterValues("rackid[]");
+                String[] weightIds = request.getParameterValues("weightId[]");
+                String[] categoryIds = request.getParameterValues("categoryId[]");
 
-                if (!updated) {
-                    throw new SQLException("Failed to update stock_in record");
+                if (!allArraysSameLength(productIds, quantities, expireDates, zoneIds, rackIds)) {
+                    throw new ServletException("Invalid form data: arrays have different lengths");
                 }
 
-                // Delete existing stock items and management entries before re-inserting
-                dao.deleteStockItemsByStockInId(stockInId);
+                StockInDAO dao = new StockInDAO();
+                int stockInId;
 
-            } else {
-                // Create new stock_in record
-                stockInId = dao.insertMainStock(supplierId, arrivalDate, status);
-            }
+                if ("update".equalsIgnoreCase(action)) {
+                    // Get existing stockInId from request
+                    stockInId = Integer.parseInt(request.getParameter("stockInId"));
+                    boolean updated = dao.updateMainStock(stockInId, supplierId, arrivalDate, status);
 
-            boolean allItemsInserted = true;
+                    if (!updated) {
+                        throw new SQLException("Failed to update stock_in record");
+                    }
 
-            for (int i = 0; i < productIds.length; i++) {
-                int stockContainId = dao.insertStockItem(
-                        stockInId,
-                        Integer.parseInt(productIds[i]),
-                        Integer.parseInt(quantities[i]),
-                        Date.valueOf(expireDates[i])
-                );
+                    // Delete existing stock items and management entries before re-inserting
+                    dao.deleteStockItemsByStockInId(stockInId);
 
-                if (stockContainId == -1) {
-                    allItemsInserted = false;
-                    break;
+                } else {
+                    // Create new stock_in record
+                    stockInId = dao.insertMainStock(supplierId, arrivalDate, status);
                 }
 
-                boolean manageSuccess = dao.insertStockManage(
-                        stockContainId,
-                        Integer.parseInt(zoneIds[i]),
-                        Integer.parseInt(rackIds[i]),
-                        Integer.parseInt(quantities[i]),
-                        Integer.parseInt(weightIds[i])
-                );
+                boolean allItemsInserted = true;
 
-                if (!manageSuccess) {
-                    allItemsInserted = false;
-                    break;
+                for (int i = 0; i < productIds.length; i++) {
+                    int stockContainId = dao.insertStockItem(
+                            stockInId,
+                            Integer.parseInt(productIds[i]),
+                            Integer.parseInt(quantities[i]),
+                            Date.valueOf(expireDates[i])
+                    );
+
+                    if (stockContainId == -1) {
+                        allItemsInserted = false;
+                        break;
+                    }
+
+                    boolean manageSuccess = dao.insertStockManage(
+                            stockContainId,
+                            Integer.parseInt(zoneIds[i]),
+                            Integer.parseInt(rackIds[i]),
+                            Integer.parseInt(quantities[i]),
+                            Integer.parseInt(weightIds[i])
+                    );
+
+                    if (!manageSuccess) {
+                        allItemsInserted = false;
+                        break;
+                    }
                 }
-            }
 
-            if (allItemsInserted) {
-                request.getSession().setAttribute("successMessage", "Stock successfully " + (action.equals("update") ? "updated" : "added") + "!");
-                response.sendRedirect("Stocks?action=" + (action.equals("update") ? "updated" : "added"));
-            } else {
-                request.getSession().setAttribute("errorMessage", "Failed to add some stock items");
+                if (allItemsInserted) {
+                    request.getSession().setAttribute("successMessage", "Stock successfully " + (action.equals("update") ? "updated" : "added") + "!");
+                    response.sendRedirect("Stocks?action=" + (action.equals("update") ? "updated" : "added"));
+                } else {
+                    request.getSession().setAttribute("errorMessage", "Failed to add some stock items");
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.getSession().setAttribute("errorMessage", "Error: " + e.getMessage());
                 request.getRequestDispatcher("error.jsp").forward(request, response);
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.getSession().setAttribute("errorMessage", "Error: " + e.getMessage());
-            request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
 
