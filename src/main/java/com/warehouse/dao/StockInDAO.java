@@ -24,32 +24,6 @@ public class StockInDAO {
         }
     }
 
-    public List<Zone> getZoneList() {
-        List<Zone> list = new ArrayList<>();
-        String sql = "SELECT zone_id, zone_name FROM zones";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(new Zone(rs.getInt("zone_id"), rs.getString("zone_name")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public List<Rack> getRackList() {
-        List<Rack> list = new ArrayList<>();
-        String sql = "SELECT rack_id, rack_name FROM racks";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(new Rack(rs.getInt("rack_id"), rs.getString("rack_name")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     public int insertMainStock(int supplierId, Date arrivalDate, String status) throws SQLException {
         String sql = "INSERT INTO stock_in (supplier_id, arrival_date, status) VALUES (?, ?, ?)";
 
@@ -114,33 +88,32 @@ public class StockInDAO {
 
     //no usage until implement the admin approval part
 
-//    public void deleteMainStock(int stockInId) {
-//        try {
-//            // Delete items first to maintain referential integrity
-//            String deleteItems = "DELETE FROM stock_contain_items WHERE stockin_id = ?";
-//            try (PreparedStatement ps = conn.prepareStatement(deleteItems)) {
-//                ps.setInt(1, stockInId);
-//                ps.executeUpdate();
-//            }
-//
-//            // Then delete the main record
-//            String deleteMain = "DELETE FROM stock_in WHERE id = ?";
-//            try (PreparedStatement ps = conn.prepareStatement(deleteMain)) {
-//                ps.setInt(1, stockInId);
-//                ps.executeUpdate();
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void deleteMainStock(int stockInId) {
+        try {
+            // Delete items first to maintain referential integrity
+            String deleteItems = "DELETE FROM stock_contain_items WHERE stockin_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(deleteItems)) {
+                ps.setInt(1, stockInId);
+                ps.executeUpdate();
+            }
 
-    public List<StockIn> getPendingStocks() throws SQLException {
+            // Then delete the main record
+            String deleteMain = "DELETE FROM stock_in WHERE id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(deleteMain)) {
+                ps.setInt(1, stockInId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<StockIn> getStocks() throws SQLException {
         List<StockIn> pendingStocks = new ArrayList<>();
-        String sql = "SELECT s.stockin_id, s.supplier_id, sup.name as supplier_name, " +
+        String sql = "SELECT s.stockin_id, s.supplier_id, sup.name as supplier_name, s.status, " +
                 "s.arrival_date, s.timestamp " +
                 "FROM stock_in s " +
                 "JOIN suppliers sup ON s.supplier_id = sup.supplier_id " +
-                "WHERE s.status = 'pending' " +
                 "ORDER BY s.timestamp DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -151,6 +124,7 @@ public class StockInDAO {
                 stock.setSupplierId(rs.getInt("supplier_id"));
                 stock.setSupplierName(rs.getString("supplier_name"));
                 stock.setArrivalDate(rs.getDate("arrival_date"));
+                stock.setStatus(rs.getString("status"));
                 stock.setCreatedDate(rs.getDate("timestamp"));
                 pendingStocks.add(stock);
             }
@@ -185,7 +159,7 @@ public class StockInDAO {
 
     // Update stock status
     public boolean updateStockStatus(int stockInId, String status) throws SQLException {
-        String sql = "UPDATE stock_in SET status = ? WHERE id = ?";
+        String sql = "UPDATE stock_in SET status = ? WHERE stockin_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, stockInId);
@@ -196,15 +170,32 @@ public class StockInDAO {
     // Get items for a stock
     private List<StockItem> getStockItems(int stockInId) throws SQLException {
         List<StockItem> items = new ArrayList<>();
-        String sql = "SELECT sci.stock_contain_id, sci.stockin_id ,sci.product_id, p.product_name, p.category_id,p.weight_id, " +
-                "sci.quantity, sci.expiry_date, " +
-                "sm.zone_id, z.zone_name, sm.rack_id, r.rack_name " +
-                "FROM stock_contain_items sci " +
-                "JOIN products p ON sci.product_id = p.product_id " +
-                "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
-                "JOIN zones z ON sm.zone_id = z.zone_id " +
-                "JOIN racks r ON sm.rack_id = r.rack_id " +
-                "WHERE sci.stockin_id = ?";
+        String sql = "SELECT \n" +
+                "    sci.stock_contain_id, \n" +
+                "    sci.stockin_id,\n" +
+                "    sci.product_id, \n" +
+                "    p.product_name, \n" +
+                "    p.category_id,\n" +
+                "    p.weight_id,\n" +
+                "    sci.quantity, \n" +
+                "    sci.expiry_date,\n" +
+                "    IFNULL(sm.zone_id, 0) AS zone_id, \n" +
+                "    IFNULL(z.zone_name, 'Not Assigned') AS zone_name,\n" +
+                "    IFNULL(sm.rack_id, 0) AS rack_id, \n" +
+                "    IFNULL(r.rack_name, 'Not Assigned') AS rack_name\n" +
+                "FROM \n" +
+                "    stock_contain_items sci\n" +
+                "JOIN \n" +
+                "    products p ON sci.product_id = p.product_id\n" +
+                "LEFT JOIN \n" +
+                "    space_manage sm ON sci.stock_contain_id = sm.stock_contain_id\n" +
+                "LEFT JOIN \n" +
+                "    zones z ON sm.zone_id = z.zone_id\n" +
+                "LEFT JOIN \n" +
+                "    racks r ON sm.rack_id = r.rack_id\n" +
+                "WHERE \n" +
+                "    sci.stockin_id = ?";
+
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stockInId);
@@ -225,5 +216,79 @@ public class StockInDAO {
         }
         return items;
     }
+    public boolean updateMainStock(int stockInId, int supplierId, Date arrivalDate, String status) throws SQLException {
+        String sql = "UPDATE stock_in SET supplier_id = ?, arrival_date = ?, status = ? WHERE stockin_id = ?";
 
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, supplierId);
+            ps.setDate(2, arrivalDate);
+            ps.setString(3, status);
+            ps.setInt(4, stockInId);
+
+            int rowsUpdated = ps.executeUpdate();
+            return rowsUpdated > 0;
+        }
+    }
+    public boolean updateStockItem(int stockContainId, int stockInId, int productId, int quantity, Date expireDate) throws SQLException {
+        String sql = "UPDATE stock_contain_items SET stockin_id = ?, product_id = ?, quantity = ?, expiry_date = ? WHERE stock_contain_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, stockInId);
+            ps.setInt(2, productId);
+            ps.setInt(3, quantity);
+            ps.setDate(4, expireDate);
+            ps.setInt(5, stockContainId);
+
+            int rowsUpdated = ps.executeUpdate();
+            return rowsUpdated > 0;
+        }
+    }
+    public void deleteStockItemsByStockInId(int stockInId) throws SQLException {
+        // First delete from stock_manage (assumes it depends on stock_contain_items)
+        String deleteManage = "DELETE FROM space_manage WHERE stock_contain_id IN (SELECT stock_contain_id FROM stock_contain_items WHERE stockin_id = ?)";
+        try (PreparedStatement ps = conn.prepareStatement(deleteManage)) {
+            ps.setInt(1, stockInId);
+            ps.executeUpdate();
+        }
+
+        // Then delete from stock_contain_items
+        String deleteItems = "DELETE FROM stock_contain_items WHERE stockin_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(deleteItems)) {
+            ps.setInt(1, stockInId);
+            ps.executeUpdate();
+        }
+    }
+    public boolean insertIntoInventory(int stockInId) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+
+        // Step 1: Check for missing space_manage mappings
+        String checkQuery = "SELECT sci.stock_contain_id " +
+                "FROM stock_contain_items sci " +
+                "LEFT JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                "WHERE sci.stockin_id = ? AND (sm.zone_id IS NULL OR sm.rack_id IS NULL)";
+
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+            checkStmt.setInt(1, stockInId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                throw new SQLException("Error: Missing zone or rack");
+            }
+            else{
+                // Step 2: Perform the insert
+                String insertQuery = "INSERT INTO inventory (product_id, zone_id, rack_id, quantity, expiry_date, arrival_date, holding_time) " +
+                        "SELECT sci.product_id, sm.zone_id, sm.rack_id, sci.quantity, sci.expiry_date, si.arrival_date, " +
+                        "DATEDIFF(CURDATE(), si.arrival_date) as holding_time " +
+                        "FROM stock_contain_items sci " +
+                        "JOIN stock_in si ON sci.stockin_id = si.stockin_id " +
+                        "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                        "WHERE sci.stockin_id = ?";
+
+                try (PreparedStatement ps = conn.prepareStatement(insertQuery)) {
+                    ps.setInt(1, stockInId);
+                    return ps.executeUpdate() > 0;
+                }
+            }
+        }
+    }
 }
