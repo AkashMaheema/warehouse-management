@@ -29,6 +29,15 @@
             <c:remove var="successMessage" scope="session"/>
         </c:if>
 
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show">
+                ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <c:remove var="errorMessage" scope="session"/>
+        </c:if>
+
+
         <table class="table table-bordered table-hover">
             <thead class="table-light">
                 <tr>
