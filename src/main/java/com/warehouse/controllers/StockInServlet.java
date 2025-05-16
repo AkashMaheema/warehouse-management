@@ -69,6 +69,7 @@ public class StockInServlet extends HttpServlet {
     private void viewStock(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         int stockInId = Integer.parseInt(request.getParameter("id"));
+        System.out.println(stockInId);
         String disableUpdate = request.getParameter("disableUpdate");
 
         StockInDAO dao = new StockInDAO();
@@ -114,7 +115,10 @@ public class StockInServlet extends HttpServlet {
 
             Gson gson = new Gson();
             request.setAttribute("productListJson", gson.toJson(productDAO.getAll()));
+            System.out.println(gson.toJson(productDAO.getAll()) );
             request.setAttribute("weightListJson", gson.toJson(weightDAO.getAll()));
+            System.out.println(gson.toJson(stockIn));
+
             request.getRequestDispatcher("stock_in.jsp").forward(request, response);
         } else {
             response.sendRedirect("StockIn");
