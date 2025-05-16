@@ -101,4 +101,68 @@ public class ProductDAO {
         }
         return list;
     }
+    public Product getProductById(int id) {
+        Product product = null;
+        String sql = "SELECT p.product_id, p.product_name, c.category_id, c.category_name, " +
+                "w.weight_id, w.weight, p.reorder_level " +
+                "FROM products p " +
+                "JOIN categories c ON p.category_id = c.category_id " +
+                "JOIN weights w ON p.weight_id = w.weight_id " +
+                "WHERE p.product_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    product = new Product();
+                    product.setProductId(rs.getInt("product_id"));
+                    product.setProductName(rs.getString("product_name"));
+                    product.setCategoryId(rs.getInt("category_id"));
+                    product.setCategoryName(rs.getString("category_name"));
+                    product.setWeightId(rs.getInt("weight_id"));
+                    product.setWeightValue(rs.getDouble("weight"));
+                    product.setReorderLevel(rs.getInt("reorder_level"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return product;
+    }
+    public List<Product> getLowStockProducts() {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT p.product_id, p.product_name, c.category_id, c.category_name, " +
+                "w.weight_id, w.weight, p.reorder_level, COALESCE(SUM(i.quantity), 0) AS current_stock " +
+                "FROM products p " +
+                "JOIN categories c ON p.category_id = c.category_id " +
+                "JOIN weights w ON p.weight_id = w.weight_id " +
+                "LEFT JOIN inventory i ON i.product_id = p.product_id " +
+                "WHERE p.product_id NOT IN ( " +
+                "    SELECT product_id FROM reorders WHERE reorder_date >= NOW() - INTERVAL 3 DAY" +
+                ") " +
+                "GROUP BY p.product_id, p.product_name, c.category_id, c.category_name, " +
+                "w.weight_id, w.weight, p.reorder_level " +
+                "HAVING current_stock < p.reorder_level " +
+                "ORDER BY current_stock ASC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Product product = new Product();
+                product.setProductId(rs.getInt("product_id"));
+                product.setProductName(rs.getString("product_name"));
+                product.setCategoryId(rs.getInt("category_id"));
+                product.setCategoryName(rs.getString("category_name"));
+                product.setWeightId(rs.getInt("weight_id"));
+                product.setWeightValue(rs.getDouble("weight"));
+                product.setReorderLevel(rs.getInt("reorder_level"));
+                product.setCurrentStock(rs.getInt("current_stock"));
+                list.add(product);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }
