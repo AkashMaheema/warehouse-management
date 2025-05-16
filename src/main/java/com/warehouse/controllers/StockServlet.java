@@ -38,10 +38,14 @@ public class StockServlet extends HttpServlet {
 
             if ("approve".equals(action)) {
                 if (stockInDAO.updateStockStatus(stockInId, "approved")) {
-                    request.getSession().setAttribute("successMessage", "Stock approved successfully!");
-                    // Here you would also update inventory
+                    if (stockInDAO.insertIntoInventory(stockInId)) {
+                        request.getSession().setAttribute("successMessage", "Stock approved and inventory updated!");
+                    } else {
+                        request.getSession().setAttribute("successMessage", "Stock approved, but inventory update failed!");
+                    }
                 }
-            } else if ("reject".equals(action)) {
+            }
+            else if ("reject".equals(action)) {
                 if (stockInDAO.updateStockStatus(stockInId, "rejected")) {
                     request.getSession().setAttribute("successMessage", "Stock rejected!");
                 }
