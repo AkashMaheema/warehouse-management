@@ -148,10 +148,10 @@
       <a href="dashboard.jsp"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
     </li>
     <li class="<%= "inventory".equals(request.getParameter("activePage")) ? "active" : "" %>">
-      <a href="inventory.jsp"><i class="bi bi-box-seam me-2"></i> Inventory</a>
+      <a href="Inventory"><i class="bi bi-box-seam me-2"></i> Inventory</a>
     </li>
     <li class="<%= "supply".equals(request.getParameter("activePage")) ? "active" : "" %>">
-      <a href="supply.jsp"><i class="bi bi-truck me-2"></i> Supply</a>
+      <a href="Stocks"><i class="bi bi-truck me-2"></i> Supply</a>
     </li>
     <li class="<%= "orders".equals(request.getParameter("activePage")) ? "active" : "" %>">
       <a href="orders.jsp"><i class="bi bi-cart me-2"></i> Orders</a>
