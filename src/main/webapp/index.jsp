@@ -47,6 +47,7 @@
                 <li class="list-group-item"><a class="text-decoration-none" href="manageZone">➕ Manage Zone</a></li>
                 <li class="list-group-item"><a class="text-decoration-none" href="Stocks">➕ Manage Stock</a></li>
                 <li class="list-group-item"><a class="text-decoration-none" href="Inventory">➕ Inventory</a></li>
+                <li class="list-group-item"><a class="text-decoration-none" href="Reorder">➕ Reorder</a></li>
             </ul>
         </div>
     </div>

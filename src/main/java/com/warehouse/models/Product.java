@@ -6,6 +6,7 @@ public class Product {
     private int categoryId;
     private int weightId;
     private int reorderLevel;
+    private int CurrentStock;
     private String categoryName;
     private double weightValue;
 
@@ -82,6 +83,14 @@ public class Product {
 
     public void setWeightValue(double weightValue) {
         this.weightValue = weightValue;
+    }
+
+    public int getCurrentStock() {
+        return CurrentStock;
+    }
+
+    public void setCurrentStock(int currentStock) {
+        CurrentStock = currentStock;
     }
 }
 
