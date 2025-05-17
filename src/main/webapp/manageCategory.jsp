@@ -65,46 +65,8 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        $('#addForm').submit(function(e) {
-            e.preventDefault();
-            $.post('manageCategory', {
-                action: 'create',
-                name: $(this).find('[name=name]').val()
-            }, function() {
-                location.reload();
-            });
-        });
+    <script src="js/manage_category_script.js"></script>
 
-        $('.editBtn').click(function() {
-            const row = $(this).closest('tr');
-            $('#editForm [name=id]').val(row.data('id'));
-            $('#editForm [name=name]').val(row.find('.name').text());
-            new bootstrap.Modal(document.getElementById('editModal')).show();
-        });
 
-        $('#editForm').submit(function(e) {
-            e.preventDefault();
-            $.post('manageCategory', {
-                action: 'update',
-                id: $(this).find('[name=id]').val(),
-                name: $(this).find('[name=name]').val()
-            }, function() {
-                location.reload();
-            });
-        });
-
-        $('.deleteBtn').click(function() {
-            if (confirm("Are you sure?")) {
-                const id = $(this).closest('tr').data('id');
-                $.post('manageCategory', {
-                    action: 'delete',
-                    id: id
-                }, function() {
-                    location.reload();
-                });
-            }
-        });
-    </script>
 </body>
 </html>
