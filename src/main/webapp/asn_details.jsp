@@ -3,6 +3,12 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="asn_management" />
+    <jsp:param name="activePage" value="asn_management" />
+    <jsp:param name="content" value="asn_management" />
+</jsp:include>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,10 +17,6 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
         .card {
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -61,7 +63,7 @@
 <body>
     <div class="container py-5">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header" style="color:white; background:#311F10;">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">ASN Details - ASN-${asn.asnId}</h4>
                     <a href="ASNManagement" class="btn btn-light btn-sm">Back to List</a>

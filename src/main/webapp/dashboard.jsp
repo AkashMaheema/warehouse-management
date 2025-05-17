@@ -52,7 +52,7 @@
                    left: 0;
                    height: 100%;
                    width: 100%;
-                   background-image: url('images/background2.webp'); /* Replace with your image path */
+                   background-color:#F7EFE2;
                    background-size: cover;
                    background-repeat: no-repeat;
                    background-position: center;
@@ -265,172 +265,112 @@
 
 
         <div class="row">
-            <!-- Warehouse Activity -->
-            <div class="col-lg-6 mb-3">
-                <div class="section h-100">
-                    <h2 class="h4 mb-4"><i class="bi bi-warehouse"></i> Warehouse Activity</h2>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-4">
-                                <div class="card-header bg-primary text-white">
-                                    <h3 class="h6 mb-0"><i class="bi bi-box-arrow-in-down"></i> Recent Inbound</h3>
-                                </div>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        2025-05-10 - AgriCo
-                                        <span class="badge bg-primary rounded-pill">1,000 kg</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        2025-05-09 - RiceMart
-                                        <span class="badge bg-primary rounded-pill">750 kg</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        2025-05-08 - FarmFresh
-                                        <span class="badge bg-primary rounded-pill">900 kg</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h3 class="h6 mb-0"><i class="bi bi-box-arrow-up"></i> Recent Outbound</h3>
-                                </div>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        2025-05-11 - CityStore
-                                        <span class="badge bg-success rounded-pill">500 kg</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        2025-05-10 - LocalMart
-                                        <span class="badge bg-success rounded-pill">850 kg</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        2025-05-09 - QuickBuy
-                                        <span class="badge bg-success rounded-pill">700 kg</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+          <!-- Warehouse Activity (50%) -->
+          <div class="col-lg-6 mb-3">
+            <div class="section h-100">
+              <h2 class="h4 mb-4"><i class="bi bi-warehouse"></i> Warehouse Activity</h2>
+              <div class="row">
+                <div class="col-12 mb-3">
+                  <div class="card">
+                    <div class="card-header bg-primary text-white">
+                      <h3 class="h6 mb-0"><i class="bi bi-box-arrow-in-down"></i> Recent Inbound</h3>
                     </div>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        2025-05-10 - AgriCo <span class="badge bg-primary rounded-pill">1,000 kg</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        2025-05-09 - RiceMart <span class="badge bg-primary rounded-pill">750 kg</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        2025-05-08 - FarmFresh <span class="badge bg-primary rounded-pill">900 kg</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header bg-success text-white">
+                      <h3 class="h6 mb-0"><i class="bi bi-box-arrow-up"></i> Recent Outbound</h3>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        2025-05-11 - CityStore <span class="badge bg-success rounded-pill">500 kg</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        2025-05-10 - LocalMart <span class="badge bg-success rounded-pill">850 kg</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        2025-05-09 - QuickBuy <span class="badge bg-success rounded-pill">700 kg</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <!-- Orders Summary -->
-            <div class="col-lg-6 mb-3">
-                <div class="section h-100">
-                    <h2 class="h4 mb-4"><i class="bi bi-receipt"></i> Orders Summary</h2>
-                    <div class="row">
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-light h-100">
-                                <div class="card-body text-center">
-                                    <h5 class="text-muted">Total (May)</h5>
-                                    <h2 class="text-primary">35</h2>
-                                    <div class="progress mt-2" style="height: 5px;">
-                                        <div class="progress-bar bg-primary" style="width: 100%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-light h-100">
-                                <div class="card-body text-center">
-                                    <h5 class="text-muted">Pending</h5>
-                                    <h2 class="text-warning">5</h2>
-                                    <div class="progress mt-2" style="height: 5px;">
-                                        <div class="progress-bar bg-warning" style="width: 14%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-light h-100">
-                                <div class="card-body text-center">
-                                    <h5 class="text-muted">Done</h5>
-                                    <h2 class="text-success">28</h2>
-                                    <div class="progress mt-2" style="height: 5px;">
-                                        <div class="progress-bar bg-success" style="width: 80%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-light h-100">
-                                <div class="card-body text-center">
-                                    <h5 class="text-muted">Cancelled</h5>
-                                    <h2 class="text-danger">2</h2>
-                                    <div class="progress mt-2" style="height: 5px;">
-                                        <div class="progress-bar bg-danger" style="width: 6%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+          <!-- Orders Summary (50%) -->
+          <div class="col-lg-6 mb-3">
+            <div class="section h-100">
+              <h2 class="h4 mb-4"><i class="bi bi-receipt"></i> Orders Summary</h2>
+              <div class="row">
+                <div class="col-md-3 col-6 mb-3">
+                  <div class="card bg-light h-100">
+                    <div class="card-body text-center">
+                      <h5 class="text-muted">Total (May)</h5>
+                      <h2 class="text-primary">35</h2>
+                      <div class="progress mt-2" style="height: 5px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                      </div>
                     </div>
-                    <div class="mt-3">
-                        <canvas id="ordersChart" height="120"></canvas>
-                    </div>
+                  </div>
                 </div>
+                <div class="col-md-3 col-6 mb-3">
+                  <div class="card bg-light h-100">
+                    <div class="card-body text-center">
+                      <h5 class="text-muted">Pending</h5>
+                      <h2 class="text-warning">5</h2>
+                      <div class="progress mt-2" style="height: 5px;">
+                        <div class="progress-bar bg-warning" style="width: 14%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                  <div class="card bg-light h-100">
+                    <div class="card-body text-center">
+                      <h5 class="text-muted">Done</h5>
+                      <h2 class="text-success">28</h2>
+                      <div class="progress mt-2" style="height: 5px;">
+                        <div class="progress-bar bg-success" style="width: 80%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                  <div class="card bg-light h-100">
+                    <div class="card-body text-center">
+                      <h5 class="text-muted">Cancelled</h5>
+                      <h2 class="text-danger">2</h2>
+                      <div class="progress mt-2" style="height: 5px;">
+                        <div class="progress-bar bg-danger" style="width: 6%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3">
+                <canvas id="ordersChart" height="120"></canvas>
+              </div>
             </div>
+          </div>
         </div>
 
         <div class="row">
-            <!-- Supplier & Customer Summary -->
-            <div class="col-lg-6 mb-3">
-                <div class="section h-100">
-                    <h2 class="h4 mb-4"><i class="bi bi-people"></i> Suppliers & Customers</h2>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-header bg-info text-white">
-                                    <h3 class="h6 mb-0"><i class="bi bi-truck"></i> Active Suppliers: 4</h3>
-                                </div>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        AgriCo
-                                        <span class="badge bg-info rounded-pill">3 shipments</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        RiceMart
-                                        <span class="badge bg-info rounded-pill">2 shipments</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        FarmFresh
-                                        <span class="badge bg-info rounded-pill">2 shipments</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        GlobalRice
-                                        <span class="badge bg-info rounded-pill">1 shipment</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header bg-purple text-white" style="background-color: #6f42c1;">
-                                    <h3 class="h6 mb-0"><i class="bi bi-person-check"></i> Top Customers</h3>
-                                </div>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        CityStore
-                                        <span class="badge bg-purple rounded-pill" style="background-color: #6f42c1;">12 orders</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        LocalMart
-                                        <span class="badge bg-purple rounded-pill" style="background-color: #6f42c1;">8 orders</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        QuickBuy
-                                        <span class="badge bg-purple rounded-pill" style="background-color: #6f42c1;">6 orders</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Notifications / Alerts -->
-            <div class="col-lg-6 mb-3">
+            <div class="mb-3 w-100">
                 <div class="section h-100">
                     <h2 class="h4 mb-4"><i class="bi bi-bell"></i> Notifications & Alerts</h2>
                     <div class="alert-item warning">
@@ -460,29 +400,6 @@
                 </div>
             </div>
         </div>
-
-
-        <!-- User Summary -->
-        <div class="section user-summary">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5 class="mb-3"><i class="bi bi-person-circle"></i> User Information</h5>
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-person me-2"></i>
-                        <span>Logged in as: <strong>Admin</strong></span>
-                    </div>
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-clock-history me-2"></i>
-                        <span>Last Login: <strong>2025-05-12 09:32 AM</strong></span>
-                    </div>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <button class="btn btn-outline-light me-2"><i class="bi bi-gear"></i> Settings</button>
-                    <button class="btn btn-light"><i class="bi bi-box-arrow-right"></i> Logout</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

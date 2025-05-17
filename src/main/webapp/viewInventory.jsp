@@ -2,15 +2,23 @@
 <%@ page import="java.util.*, com.warehouse.models.Inventory" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="manageCategory" />
+    <jsp:param name="activePage" value="manageCategory" />
+    <jsp:param name="content" value="manageCategory" />
+</jsp:include>
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Inventory List</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="container mt-4">
-    <h2 class="mb-4">Inventory List</h2>
+<div class="container">
+        <h2 class="category-heading">Inventory List</h2>
     <c:if test="${not empty param.success}">
         <div class="alert alert-success">${param.success}</div>
     </c:if>

@@ -207,7 +207,7 @@
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="fas fa-trash"></i>Remove
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -216,13 +216,13 @@
                                     </tbody>
                                 </table>
                                 </div>
-                            </div>
-                        </div>
+
+
                         <div class="text-center mb-4">
                             <button
                                 type="submit"
                                 class="btn btn-primary btn-lg"
-                                <c:if test="${disableUpdate}">disabled</c:if>>
+                                <c:if test="${disableUpdate}"></c:if>>
                                 <c:choose>
                                     <c:when test="${not empty stockIn}">
                                         Update Stock
