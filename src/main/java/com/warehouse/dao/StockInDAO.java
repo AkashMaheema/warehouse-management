@@ -170,15 +170,32 @@ public class StockInDAO {
     // Get items for a stock
     private List<StockItem> getStockItems(int stockInId) throws SQLException {
         List<StockItem> items = new ArrayList<>();
-        String sql = "SELECT sci.stock_contain_id, sci.stockin_id ,sci.product_id, p.product_name, p.category_id,p.weight_id, " +
-                "sci.quantity, sci.expiry_date, " +
-                "sm.zone_id, z.zone_name, sm.rack_id, r.rack_name " +
-                "FROM stock_contain_items sci " +
-                "JOIN products p ON sci.product_id = p.product_id " +
-                "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
-                "JOIN zones z ON sm.zone_id = z.zone_id " +
-                "JOIN racks r ON sm.rack_id = r.rack_id " +
-                "WHERE sci.stockin_id = ?";
+        String sql = "SELECT \n" +
+                "    sci.stock_contain_id, \n" +
+                "    sci.stockin_id,\n" +
+                "    sci.product_id, \n" +
+                "    p.product_name, \n" +
+                "    p.category_id,\n" +
+                "    p.weight_id,\n" +
+                "    sci.quantity, \n" +
+                "    sci.expiry_date,\n" +
+                "    IFNULL(sm.zone_id, 0) AS zone_id, \n" +
+                "    IFNULL(z.zone_name, 'Not Assigned') AS zone_name,\n" +
+                "    IFNULL(sm.rack_id, 0) AS rack_id, \n" +
+                "    IFNULL(r.rack_name, 'Not Assigned') AS rack_name\n" +
+                "FROM \n" +
+                "    stock_contain_items sci\n" +
+                "JOIN \n" +
+                "    products p ON sci.product_id = p.product_id\n" +
+                "LEFT JOIN \n" +
+                "    space_manage sm ON sci.stock_contain_id = sm.stock_contain_id\n" +
+                "LEFT JOIN \n" +
+                "    zones z ON sm.zone_id = z.zone_id\n" +
+                "LEFT JOIN \n" +
+                "    racks r ON sm.rack_id = r.rack_id\n" +
+                "WHERE \n" +
+                "    sci.stockin_id = ?";
+
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, stockInId);
@@ -241,5 +258,37 @@ public class StockInDAO {
             ps.executeUpdate();
         }
     }
+    public boolean insertIntoInventory(int stockInId) throws SQLException {
+        Connection conn = DBConnection.getConnection();
 
+        // Step 1: Check for missing space_manage mappings
+        String checkQuery = "SELECT sci.stock_contain_id " +
+                "FROM stock_contain_items sci " +
+                "LEFT JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                "WHERE sci.stockin_id = ? AND (sm.zone_id IS NULL OR sm.rack_id IS NULL)";
+
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+            checkStmt.setInt(1, stockInId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                throw new SQLException("Error: Missing zone or rack");
+            }
+            else{
+                // Step 2: Perform the insert
+                String insertQuery = "INSERT INTO inventory (product_id, zone_id, rack_id, quantity, expiry_date, arrival_date, holding_time) " +
+                        "SELECT sci.product_id, sm.zone_id, sm.rack_id, sci.quantity, sci.expiry_date, si.arrival_date, " +
+                        "DATEDIFF(CURDATE(), si.arrival_date) as holding_time " +
+                        "FROM stock_contain_items sci " +
+                        "JOIN stock_in si ON sci.stockin_id = si.stockin_id " +
+                        "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                        "WHERE sci.stockin_id = ?";
+
+                try (PreparedStatement ps = conn.prepareStatement(insertQuery)) {
+                    ps.setInt(1, stockInId);
+                    return ps.executeUpdate() > 0;
+                }
+            }
+        }
+    }
 }
