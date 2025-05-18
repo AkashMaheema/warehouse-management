@@ -1,8 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="com.warehouse.models.Category" %>
-<%@ page import="com.warehouse.dao.CategoryDAO" %>
+<%@ page import="com.warehouse.models.Rack" %>
+<%@ page import="com.warehouse.models.Zone" %>
+<%@ page import="com.warehouse.dao.ZoneDAO" %>
 
 <jsp:include page="template/layout.jsp">
     <jsp:param name="title" value="manageRacks" />
