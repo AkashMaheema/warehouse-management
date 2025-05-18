@@ -1,5 +1,4 @@
 package com.warehouse.controllers;
-
 import com.warehouse.dao.UserDAO;
 import com.warehouse.models.User;
 import java.io.IOException;
