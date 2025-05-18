@@ -1,42 +1,47 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="com.warehouse.models.ASN" %>
+<%@ page import="com.warehouse.dao.ASNDAO" %>
+
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="asn_management" />
+    <jsp:param name="activePage" value="asn_management" />
+    <jsp:param name="content" value="asn_management" />
+</jsp:include>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>ASN Management</title>
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .status-pending {
-            color: #f6c23e;
-            font-weight: 500;
-        }
-        .status-approved {
-            color: #1cc88a;
-            font-weight: 500;
-        }
-        .status-rejected {
-            color: #e74a3b;
-            font-weight: 500;
-        }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1100;
-        }
-    </style>
+            .card {
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .status-pending {
+                color: #f6c23e;
+                font-weight: 500;
+            }
+            .status-approved {
+                color: #1cc88a;
+                font-weight: 500;
+            }
+            .status-rejected {
+                color: #e74a3b;
+                font-weight: 500;
+            }
+            .toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1100;
+            }
+        </style>
 </head>
 <body>
     <div class="toast-container">
@@ -69,13 +74,13 @@
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Advanced Shipping Notices (ASN)</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createASNModal">
+            <button class="custom-add-btn" data-bs-toggle="modal" data-bs-target="#createASNModal">
                 Create New ASN
             </button>
         </div>
 
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header " style="color:white; background:#311F10;">
                 <h4 class="mb-0">ASN List</h4>
             </div>
             <div class="card-body">
@@ -87,7 +92,6 @@
                                 <th>Supplier</th>
                                 <th>Reference</th>
                                 <th>Expected Arrival</th>
-                                <th>Items</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -99,20 +103,11 @@
                                     <td>${asn.supplier != null ? asn.supplier.name : 'N/A'}</td>
                                     <td>${asn.referenceNumber}</td>
                                     <td><fmt:formatDate value="${asn.expectedArrivalDate}" pattern="yyyy-MM-dd" /></td>
-                                    <td>${asn.items != null ? asn.items.size() : 0} items</td>
                                     <td class="status-${asn.status.toLowerCase()} text-uppercase">${asn.status}</td>
                                     <td>
                                         <button class="btn btn-sm btn-info" onclick="viewASNDetails(${asn.asnId})">
                                             View
                                         </button>
-                                        <c:if test="${asn.status == 'pending'}">
-                                            <button class="btn btn-sm btn-success ms-1" onclick="approveASN(${asn.asnId})">
-                                                Approve
-                                            </button>
-                                            <button class="btn btn-sm btn-danger ms-1" onclick="rejectASN(${asn.asnId})">
-                                                Reject
-                                            </button>
-                                        </c:if>
                                     </td>
                                 </tr>
                             </c:forEach>
@@ -154,20 +149,35 @@
                                 <label class="form-label">Expected Arrival Date</label>
                                 <input type="date" name="expectedArrivalDate" class="form-control" required>
                             </div>
+                            <div class="col-md-6 mt-4">
+                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalProduct" >Add New Product </button>
+                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalSupplier">Add New Supplier </button>
+                            </div>
+
                         </div>
 
                         <h5 class="mt-4">ASN Items</h5>
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Category</th>
                                     <th>Product</th>
                                     <th>Weight</th>
                                     <th>Quantity</th>
+                                    <th>Product Expiry Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="asnItemsTable">
                                 <tr>
+                                    <td>
+                                        <select name="categoryId" class="form-select" required>
+                                            <option value="">Select Product</option>
+                                            <c:forEach var="categories" items="${categoryList}">
+                                                <option value="${categories.categoryId}">${categories.name}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
                                     <td>
                                         <select name="productId" class="form-select" required>
                                             <option value="">Select Product</option>
@@ -186,6 +196,11 @@
                                     </td>
                                     <td>
                                         <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+                                    </td>
+                                    <td>
+                                        <input type="date" name="expiryDate" class="form-select" required>
+
+                                        </select>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-sm" onclick="removeASNItem(this)">
@@ -240,6 +255,14 @@
             const row = `
                 <tr>
                     <td>
+                        <select name="categoryId" class="form-select" required>
+                            <option value="">Select Category</option>
+                            <c:forEach var="category" items="${categoryList}">
+                                <option value="${category.categoryId}">${category.name}</option>
+                            </c:forEach>
+                        </select>
+                    </td>
+                    <td>
                         <select name="productId" class="form-select" required>
                             <option value="">Select Product</option>
                             <c:forEach var="product" items="${products}">
@@ -257,6 +280,9 @@
                     </td>
                     <td>
                         <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+                    </td>
+                    <td>
+                        <input type="date" name="expiryDate" class="form-control" required>
                     </td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm" onclick="removeASNItem(this)">
@@ -284,75 +310,7 @@ function viewASNDetails(asnId) {
     window.location.href = 'ASNManagement?action=view&asnId=' + asnId;
 }
 
-        function approveASN(asnId) {
-            Swal.fire({
-                title: 'Approve ASN',
-                text: 'Are you sure you want to approve this ASN?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, approve it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post('ASNManagement', {
-                        action: 'approve',
-                        asnId: asnId
-                    }).done(function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Approved!',
-                            text: 'ASN has been approved successfully',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
-                        });
-                    }).fail(function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to approve ASN'
-                        });
-                    });
-                }
-            });
-        }
 
-        function rejectASN(asnId) {
-            Swal.fire({
-                title: 'Reject ASN',
-                text: 'Are you sure you want to reject this ASN?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, reject it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post('ASNManagement', {
-                        action: 'reject',
-                        asnId: asnId
-                    }).done(function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Rejected!',
-                            text: 'ASN has been rejected successfully',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
-                        });
-                    }).fail(function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to reject ASN'
-                        });
-                    });
-                }
-            });
-        }
 
         $('#createASNForm').submit(function(e) {
             e.preventDefault();

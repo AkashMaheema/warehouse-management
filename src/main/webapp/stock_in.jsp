@@ -1,13 +1,23 @@
-    <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="com.warehouse.models.Category" %>
+<%@ page import="com.warehouse.dao.CategoryDAO" %>
+
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="manageStock" />
+    <jsp:param name="activePage" value="manageStock" />
+    <jsp:param name="content" value="manageStock" />
+</jsp:include>
 
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
         <title>Stock In - Rice</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="css/style.css">
 
     </head>
     <body>
@@ -28,13 +38,18 @@
 
 
 
-    <div class="container mt-5">
-        <h3>New Rice Stock Entry</h3>
+    <div class="container">
+            <h2 class="category-heading">New Rice Stock Entry</h2>
         <form action="StockIn" method="post">
-        <c:if test="${not empty stockIn}">
-            <input type="hidden" name="stockInId" value="${stockIn.id}">
-            <input type="hidden" name="action" value="update">
-        </c:if>
+        <c:choose>
+            <c:when test="${not empty stockIn}">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="stockInId" value="${stockIn.id}">
+            </c:when>
+            <c:otherwise>
+                <input type="hidden" name="action" value="add">
+            </c:otherwise>
+        </c:choose> 
             <div class="form-row mb-3">
                 <div class="col-md-4">
                     <label for="supplier_id">Supplier</label>
@@ -51,17 +66,18 @@
                 </div>
             </div>
 
-            <div class="form-row mb-3">
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-info" onclick="addRow()">Add New Stock </button>
-                        </div>
-                        <div class="col-md-4 offset-md-4 text-end">
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalProduct" >Add New Product </button>
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalSupplier">Add New Supplier </button>
-                        </div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                <button type="button" class="btn btn-info me-2" onclick="addRow()">Add New Stock</button>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalProduct">Add New Product</button>
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addModalSupplier">Add New Supplier</button>
+                </div>
             </div>
+
+                                <div class="table-container">
                                 <table class="table table-bordered">
-                                    <thead class="thead-light">
+                                    <thead class="thead-light" style="font-size:12px;">
                                         <tr>
                                             <th>Product Category</th>
                                             <th>Product Name</th>
@@ -122,7 +138,7 @@
                                                         <td>
                                                             <input type="hidden" name="zoneid[]" class="zone-id" value="${item.zoneId}">
                                                             <input type="text" class="form-control zone-name"
-                                                                value="${zoneMap[item.zoneId].name}" readonly>
+                                                                value="${zoneMap[item.zoneId].zoneName}" readonly>
                                                             <button type="button" class="btn btn-sm btn-outline-primary mt-1 btn-select-zone">
                                                                 Select Zone
                                                             </button>
@@ -130,14 +146,14 @@
                                                         <td>
                                                             <input type="hidden" name="rackid[]" class="rack-id" value="${item.rackId}">
                                                             <input type="text" class="form-control rack-name"
-                                                                value="${rackMap[item.rackId].name}" readonly>
+                                                                value="${rackMap[item.rackId].rackName}" readonly>
                                                             <button type="button" class="btn btn-sm btn-outline-secondary mt-1 btn-select-rack">
                                                                 Select Rack
                                                             </button>
                                                         </td>
                                                         <td>
                                                             <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
-                                                                <i class="fas fa-trash"></i>
+                                                                Remove
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -191,7 +207,7 @@
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="fas fa-trash"></i>Remove
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -199,10 +215,14 @@
                                         </c:choose>
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
+                                </div>
+
+
                         <div class="text-center mb-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-lg"
+                                <c:if test="${disableUpdate}"></c:if>>
                                 <c:choose>
                                     <c:when test="${not empty stockIn}">
                                         Update Stock
