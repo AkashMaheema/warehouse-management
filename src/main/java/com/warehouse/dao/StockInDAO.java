@@ -261,7 +261,6 @@ public class StockInDAO {
     public boolean insertIntoInventory(int stockInId) throws SQLException {
         Connection conn = DBConnection.getConnection();
 
-        // Step 1: Check for missing space_manage mappings
         String checkQuery = "SELECT sci.stock_contain_id " +
                 "FROM stock_contain_items sci " +
                 "LEFT JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
@@ -273,20 +272,68 @@ public class StockInDAO {
 
             if (rs.next()) {
                 throw new SQLException("Error: Missing zone or rack");
-            }
-            else{
-                // Step 2: Perform the insert
-                String insertQuery = "INSERT INTO inventory (product_id, zone_id, rack_id, quantity, expiry_date, arrival_date, holding_time) " +
-                        "SELECT sci.product_id, sm.zone_id, sm.rack_id, sci.quantity, sci.expiry_date, si.arrival_date, " +
-                        "DATEDIFF(CURDATE(), si.arrival_date) as holding_time " +
-                        "FROM stock_contain_items sci " +
-                        "JOIN stock_in si ON sci.stockin_id = si.stockin_id " +
-                        "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
-                        "WHERE sci.stockin_id = ?";
+            } else {
+                conn.setAutoCommit(false); // Begin transaction
 
-                try (PreparedStatement ps = conn.prepareStatement(insertQuery)) {
-                    ps.setInt(1, stockInId);
-                    return ps.executeUpdate() > 0;
+                try {
+                    // Step 2: Insert into inventory
+                    String insertQuery = "INSERT INTO inventory (product_id, zone_id, rack_id, quantity, expiry_date, arrival_date, holding_time) " +
+                            "SELECT sci.product_id, sm.zone_id, sm.rack_id, sci.quantity, sci.expiry_date, si.arrival_date, " +
+                            "DATEDIFF(CURDATE(), si.arrival_date) as holding_time " +
+                            "FROM stock_contain_items sci " +
+                            "JOIN stock_in si ON sci.stockin_id = si.stockin_id " +
+                            "JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                            "WHERE sci.stockin_id = ?";
+
+                    try (PreparedStatement ps = conn.prepareStatement(insertQuery)) {
+                        ps.setInt(1, stockInId);
+                        int rowsInserted = ps.executeUpdate();
+
+                        if (rowsInserted > 0) {
+                            // Step 3: Update used_capacity in zone
+                            String updateZone = "UPDATE zones z " +
+                                    "JOIN (" +
+                                    "    SELECT sm.zone_id, SUM(sci.quantity) AS total_qty " +
+                                    "    FROM stock_contain_items sci " +
+                                    "    JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                                    "    WHERE sci.stockin_id = ? " +
+                                    "    GROUP BY sm.zone_id" +
+                                    ") AS sub ON z.zone_id = sub.zone_id " +
+                                    "SET z.used_capacity = z.used_capacity + sub.total_qty";
+
+                            try (PreparedStatement updateZoneStmt = conn.prepareStatement(updateZone)) {
+                                updateZoneStmt.setInt(1, stockInId);
+                                updateZoneStmt.executeUpdate();
+                            }
+
+                            // Step 4: Update used_capacity in rack
+                            String updateRack = "UPDATE racks r " +
+                                    "JOIN (" +
+                                    "    SELECT sm.rack_id, SUM(sci.quantity) AS total_qty " +
+                                    "    FROM stock_contain_items sci " +
+                                    "    JOIN space_manage sm ON sci.stock_contain_id = sm.stock_contain_id " +
+                                    "    WHERE sci.stockin_id = ? " +
+                                    "    GROUP BY sm.rack_id" +
+                                    ") AS sub ON r.rack_id = sub.rack_id " +
+                                    "SET r.used_capacity = r.used_capacity + sub.total_qty";
+
+                            try (PreparedStatement updateRackStmt = conn.prepareStatement(updateRack)) {
+                                updateRackStmt.setInt(1, stockInId);
+                                updateRackStmt.executeUpdate();
+                            }
+
+                            conn.commit(); // All steps succeeded
+                            return true;
+                        } else {
+                            conn.rollback();
+                            return false;
+                        }
+                    }
+                } catch (SQLException e) {
+                    conn.rollback(); // Rollback on error
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(true); // Restore default
                 }
             }
         }
