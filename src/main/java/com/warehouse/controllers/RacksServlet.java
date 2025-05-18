@@ -10,12 +10,13 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @WebServlet("/manageRacks")
 public class RacksServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
         String action = req.getParameter("action");
         RacksDAO racksDAO = new RacksDAO();
         ZoneDAO zoneDAO = new ZoneDAO();
@@ -23,45 +24,116 @@ public class RacksServlet extends HttpServlet {
         try {
             switch (action) {
                 case "create":
-                    // Create a new rack
                     String newRackName = req.getParameter("rackName");
                     int newZoneId = Integer.parseInt(req.getParameter("zoneId"));
                     int newRackCapacity = Integer.parseInt(req.getParameter("rackCapacity"));
                     int newUsedCapacity = Integer.parseInt(req.getParameter("usedCapacity"));
 
-                    racksDAO.add(newRackName, newZoneId, newRackCapacity, newUsedCapacity);
-                    zoneDAO.updateZoneUsedCapacity(newZoneId);  // Recalculate used capacity of this zone
+                    // Fetch current total rack capacity in the target zone
+                    int currentTotalRackCapacity = racksDAO.getTotalRackCapacityInZone(newZoneId);
+                    System.out.println("currentTotalRackCapacity" + currentTotalRackCapacity);
+                    int zoneTotalCapacity = zoneDAO.getZoneCapacity(newZoneId);
+                    System.out.println("zoneTotalCapacity" + zoneTotalCapacity);
+                    System.out.println(currentTotalRackCapacity + newRackCapacity);
+                    // Check if adding the new rack would exceed the zone's capacity
+                    if ((currentTotalRackCapacity + newRackCapacity) > zoneTotalCapacity) {
+                        req.setAttribute("warning", "Adding this rack will exceed the zone's capacity!");
+                        req.setAttribute("racks", racksDAO.getAll());
+                        req.setAttribute("zones", zoneDAO.getAll());
+                        RequestDispatcher dispatcher = req.getRequestDispatcher("/manageRacks.jsp");
+                        dispatcher.forward(req, res);
+                        return;
+                    }
+
+                    // Proceed with creating the new rack
+                    boolean created = racksDAO.add(newRackName, newZoneId, newRackCapacity, newUsedCapacity);
+                    if (!created) {
+                        req.setAttribute("warning", "Error occurred while adding the rack.");
+                        req.setAttribute("racks", racksDAO.getAll());
+                        req.setAttribute("zones", zoneDAO.getAll());
+                        RequestDispatcher dispatcher = req.getRequestDispatcher("/manageRacks.jsp");
+                        dispatcher.forward(req, res);
+                    }
                     break;
 
                 case "update":
-                    // Update an existing rack
-                    int rackIdToUpdate = Integer.parseInt(req.getParameter("id"));
-                    String updatedRackName = req.getParameter("rackName");
-                    int updatedZoneId = Integer.parseInt(req.getParameter("zoneId"));
-                    int updatedRackCapacity = Integer.parseInt(req.getParameter("rackCapacity"));
-                    int updatedUsedCapacity = Integer.parseInt(req.getParameter("usedCapacity"));
+                    try {
+                        int rackIdToUpdate = Integer.parseInt(req.getParameter("id"));
+                        String updatedRackName = req.getParameter("rackName");
+                        int updatedZoneId = Integer.parseInt(req.getParameter("zoneId"));
+                        int updatedRackCapacity = Integer.parseInt(req.getParameter("rackCapacity"));
+                        int updatedUsedCapacity = Integer.parseInt(req.getParameter("usedCapacity"));
 
-                    int oldZoneId = racksDAO.getRackZoneId(rackIdToUpdate);  // Get old zone ID before update
-                    racksDAO.update(rackIdToUpdate, updatedRackName, updatedZoneId, updatedRackCapacity, updatedUsedCapacity);
+                        // Validate used capacity doesn't exceed rack capacity
+                        if (updatedUsedCapacity > updatedRackCapacity) {
+                            res.setContentType("application/json");
+                            PrintWriter out = res.getWriter();
+                            out.print("{\"success\": false, \"message\": \"Used capacity cannot exceed rack capacity\"}");
+                            return;
+                        }
 
-                    // If the zone changed, update both zones
-                    if (oldZoneId != updatedZoneId) {
-                        zoneDAO.updateZoneUsedCapacity(oldZoneId);
+                        // Fetch old rack details
+                        int oldZoneId = racksDAO.getRackZoneId(rackIdToUpdate);
+                        int oldRackCapacity = racksDAO.getRackCapacity(rackIdToUpdate);
+
+                        // Fetch current total rack capacity in the target zone
+                        int currentTotalRackCapacityUpdate = racksDAO.getTotalRackCapacityInZone(updatedZoneId);
+
+                        // Adjust if the zone hasn't changed
+                        if (oldZoneId == updatedZoneId) {
+                            currentTotalRackCapacityUpdate -= oldRackCapacity; // remove old rack's capacity
+                        }
+
+                        int zoneTotalCapacityUpdate = zoneDAO.getZoneCapacity(updatedZoneId);
+
+                        // Check if updating the rack will exceed the zone's capacity
+                        if ((currentTotalRackCapacityUpdate + updatedRackCapacity) > zoneTotalCapacityUpdate) {
+                            res.setContentType("application/json");
+                            PrintWriter out = res.getWriter();
+                            out.print("{\"success\": false, \"message\": \"Updating this rack will exceed the zone's total capacity\"}");
+                            return;
+                        }
+
+                        // Proceed with updating the rack
+                        boolean updated = racksDAO.update(rackIdToUpdate, updatedRackName, updatedZoneId,
+                                updatedRackCapacity, updatedUsedCapacity);
+
+                        if (updated) {
+                            // Update zone used capacity if the zone has changed
+                            if (oldZoneId != updatedZoneId) {
+                                zoneDAO.updateZoneUsedCapacity(oldZoneId);
+                            }
+                            zoneDAO.updateZoneUsedCapacity(updatedZoneId);
+
+                            res.setContentType("application/json");
+                            PrintWriter out = res.getWriter();
+                            out.print("{\"success\": true, \"message\": \"Rack updated successfully\"}");
+                        } else {
+                            res.setContentType("application/json");
+                            PrintWriter out = res.getWriter();
+                            out.print("{\"success\": false, \"message\": \"Failed to update rack\"}");
+                        }
+                    } catch (Exception e) {
+                        res.setContentType("application/json");
+                        res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        PrintWriter out = res.getWriter();
+                        out.print("{\"success\": false, \"message\": \"Error: " + e.getMessage() + "\"}");
                     }
-                    zoneDAO.updateZoneUsedCapacity(updatedZoneId);
-                    break;
-
+                    return;
                 case "delete":
-                    // Delete a rack
                     int rackIdToDelete = Integer.parseInt(req.getParameter("id"));
-                    int zoneIdOfRack = racksDAO.getRackZoneId(rackIdToDelete);  // Get the zone ID before deletion
+                    int zoneIdOfRack = racksDAO.getRackZoneId(rackIdToDelete);
 
+                    // Proceed with deleting the rack
                     racksDAO.delete(rackIdToDelete);
-                    zoneDAO.updateZoneUsedCapacity(zoneIdOfRack);  // Update the zone after deletion
+
+                    // Update the zone's used capacity
+                    zoneDAO.updateZoneUsedCapacity(zoneIdOfRack);
                     break;
 
                 default:
                     res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+                    return;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,7 +141,7 @@ public class RacksServlet extends HttpServlet {
             return;
         }
 
-        // Redirect back to the manageRacks page after action
+        // Redirect after successful create/update/delete
         res.sendRedirect("manageRacks");
     }
 

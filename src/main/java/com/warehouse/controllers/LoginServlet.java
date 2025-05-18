@@ -39,6 +39,7 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         User user = userDAO.getUserByUsername(username);
+        System.out.println(user);
 
         if (user != null && BCrypt.checkpw(password, user.getPassword())) {
             HttpSession session = request.getSession();
@@ -46,6 +47,7 @@ public class LoginServlet extends HttpServlet {
 
             // Get user role
             String role = user.getRole();
+            System.out.println(role);
 
             // Redirect based on specific role
             if ("admin".equals(role)) {
@@ -58,11 +60,11 @@ public class LoginServlet extends HttpServlet {
             }
             else if ("viewer".equals(role)) {
                 // Viewer specific redirection
-                response.sendRedirect("inventory.jsp");
+                response.sendRedirect("dashboard.jsp");
             }
             else {
                 // Default fallback for unknown roles
-                response.sendRedirect("viewer-dashboard.jsp");
+                response.sendRedirect("dashboard.jsp");
             }
         } else {
             request.setAttribute("error", "Invalid username or password");

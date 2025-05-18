@@ -7,6 +7,11 @@ public class Rack {
     private int rackCapacity;
     private int usedCapacity;
 
+    // No-argument constructor (required for frameworks, JSP, Servlets, etc.)
+    public Rack() {
+    }
+
+    // Parameterized constructor
     public Rack(int rackId, int zoneId, String rackName, int rackCapacity, int usedCapacity) {
         this.rackId = rackId;
         this.zoneId = zoneId;
