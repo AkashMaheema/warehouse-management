@@ -1,6 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*, com.warehouse.config.DBConnection" %>
 <%@ page import="java.util.*" %>
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="dashboard" />
+    <jsp:param name="activePage" value="index" />
+    <jsp:param name="content" value="index" />
+</jsp:include>
 <%
     Connection conn = DBConnection.getConnection();
     int productCount = 0, lowStockCount = 0;
@@ -49,8 +54,12 @@
                 <li class="list-group-item"><a class="text-decoration-none" href="Inventory">➕ Inventory</a></li>
                 <li class="list-group-item"><a class="text-decoration-none" href="Reorder">➕ Reorder</a></li>
                 <li class="list-group-item"><a class="text-decoration-none" href="ASNManagement">➕ ASNManagement</a></li>
+                <li class="list-group-item"><a class="text-decoration-none" href="manageUser">➕ Manage user</a></li>
             </ul>
         </div>
     </div>
+</div>
+</div>
 </body>
 </html>
+

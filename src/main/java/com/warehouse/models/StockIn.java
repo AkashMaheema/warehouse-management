@@ -77,4 +77,5 @@ public class StockIn {
         this.supplierName = supplierName;
     }
 
+
 }
