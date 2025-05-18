@@ -45,4 +45,49 @@ public class InventoryDAO {
         return list;
     }
 
+    public int getAvailableQuantity(int productId) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        // Include only non-zero quantity items that aren't already allocated
+        String sql = "SELECT COALESCE(SUM(i.quantity - COALESCE(sm.allocated_quantity, 0)), 0) AS available " +
+                "FROM inventory i " +
+                "LEFT JOIN space_manage sm ON i.inventory_id = sm.stock_contain_id " +
+                "WHERE i.product_id = ? AND i.quantity > 0";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt("available") : 0;
+        }
+    }
+
+    public List<Inventory> getInventoryByProduct(int productId) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        List<Inventory> inventoryList = new ArrayList<>();
+        String sql = "SELECT i.inventory_id, i.product_id, i.quantity, i.expiry_date, " +
+                "z.zone_id, z.zone_name, r.rack_id, r.rack_name " +
+                "FROM inventory i " +
+                "JOIN zones z ON i.zone_id = z.zone_id " +
+                "JOIN racks r ON i.rack_id = r.rack_id " +
+                "WHERE i.product_id = ? AND i.quantity > 0 " +
+                "ORDER BY i.expiry_date ASC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setInventoryId(rs.getInt("inventory_id"));
+                inv.setProductId(rs.getInt("product_id"));
+                inv.setQuantity(rs.getInt("quantity"));
+                inv.setExpiryDate(rs.getDate("expiry_date"));
+                inv.setZoneId(rs.getInt("zone_id"));
+                inv.setZoneName(rs.getString("zone_name"));
+                inv.setRackId(rs.getInt("rack_id"));
+                inv.setRackName(rs.getString("rack_name"));
+                inventoryList.add(inv);
+            }
+        }
+        return inventoryList;
+    }
+
+
 }
