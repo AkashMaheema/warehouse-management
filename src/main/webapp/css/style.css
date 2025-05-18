@@ -1,0 +1,197 @@
+
+
+
+.dashboard {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.section {
+    margin-bottom: 30px;
+}
+
+.card-grid {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    padding: 15px;
+    flex: 1;
+    min-width: 200px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card.warning { background-color: #fff4cc; }
+.card.danger { background-color: #ffd6d6; }
+
+.two-col {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+ul.alerts li {
+    margin: 8px 0;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+ul.alerts .warning { background: #fff3cd; }
+ul.alerts .danger { background: #f8d7da; }
+ul.alerts .info { background: #d1ecf1; }
+
+.action-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    min-width: 150px;
+}
+
+.chart-placeholder {
+    background-color: #eee;
+    height: 150px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+}
+
+/* Background styling */
+body {
+    position: relative;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: auto;
+    width: 100%;
+    background-color:#F7EFE2;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+/* Heading */
+.container .category-heading,
+.container .product-heading,
+.container .supplier-heading{
+    margin-top: 40px !important;
+    margin-bottom: 30px;
+    color: #052659;
+    text-align: center;
+}
+
+/* Table container */
+.table-container {
+    display: ;
+    justify-content: center;
+}
+
+/* Table styling */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 0.2px solid #000;
+    overflow: hidden;
+}
+
+.table th {
+    background: #40373A;
+    border: 0.2px solid #000;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    color: white;
+}
+
+.table td {
+    vertical-align: middle;
+    border: 0.2px solid #000;
+}
+
+
+/* Add button */
+.custom-add-btn {
+    background-color: #311F10;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-add-btn:hover {
+    background-color: #D9B98E;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.tab-btn{
+    background-color: #311F10;
+    color: #fff;
+    active-bg: #D9B98E;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tab-btn.active {
+    background-color: #D9B98E; /* Example: dark gray */
+    color: white;
+    border-color: #D9B98E;
+}
+
+
+.tab-btn:hover {
+    background-color: #D9B98E;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-container {
+        padding: 10px;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+    .custom-add-btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+
+
+
+

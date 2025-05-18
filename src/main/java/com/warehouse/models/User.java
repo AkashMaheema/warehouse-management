@@ -1,16 +1,15 @@
 package com.warehouse.models;
 
 public class User {
-    private int userId;
+
+    private int userId;  // Changed from id to userId
     private String username;
     private String password;
     private String role;
 
-    // Default constructor
+    // Constructors
     public User() {
-    }
-
-    // Constructor with all fields
+  	}
     public User(int userId, String username, String password, String role) {
         this.userId = userId;
         this.username = username;
