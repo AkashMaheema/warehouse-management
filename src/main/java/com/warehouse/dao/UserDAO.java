@@ -6,8 +6,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 public class UserDAO {
 
     public User getUserByUsername(String username) {
@@ -30,7 +28,7 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return users;
+        return user;
     }
 
     // Get a specific user by ID
@@ -59,8 +57,26 @@ public class UserDAO {
         return null;
     }
 
+    public boolean createUser(User user) {
+        String query = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getPassword());
+            stmt.setString(3, user.getRole());
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Update an existing user
-    public boolean update(int userId, String username, String password, String role) {
+    public boolean update(int userId, String username, String password, String role) throws SQLException {
         // Validate username (not only numbers)
         if (!SecurityUtils.isValidUsername(username)) {
             return false;
@@ -92,84 +108,6 @@ public class UserDAO {
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
-          
-          // Add a new user to the database
-    public boolean add(String username, String password, String role) {
-        // Validate username (not only numbers)
-        if (!SecurityUtils.isValidUsername(username)) {
-            return false;
-        }
-
-        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, username);
-            // Hash the password before storing
-            stmt.setString(2, SecurityUtils.hashPassword(password));
-            stmt.setString(3, role);
-
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Get all users from the database
-    public List<User> getAll() {
-        List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
-
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUsername(rs.getString("username"));
-                user.setPassword("********"); // Don't expose hashed password in UI
-                user.setRole(rs.getString("role"));
-                users.add(user);
-        return user;
-    }
-
-    public boolean createUser(User user) {
-        String query = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
-            stmt.setString(3, user.getRole());
-
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    // Delete a user
-    public boolean delete(int userId) {
-        String sql = "DELETE FROM users WHERE user_id = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
@@ -202,5 +140,71 @@ public class UserDAO {
         }
 
         return null; // Authentication failed
+    }
+
+    // Add a new user to the database
+    public boolean add(String username, String password, String role) {
+        // Validate username (not only numbers)
+        if (!SecurityUtils.isValidUsername(username)) {
+            return false;
+        }
+
+        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            // Hash the password before storing
+            stmt.setString(2, SecurityUtils.hashPassword(password));
+            stmt.setString(3, role);
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Get all users from the database
+    public List<User> getAll() throws SQLException {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users";
+
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword("********"); // Don't expose hashed password in UI
+                user.setRole(rs.getString("role"));
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
+
+    // Delete a user
+    public boolean delete(int userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
