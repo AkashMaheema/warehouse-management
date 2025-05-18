@@ -96,23 +96,6 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        $('#addForm').submit(function(e) {
-            e.preventDefault();
-            $.post('manageProduct', $(this).serialize(), function() {
-                location.reload();
-            });
-        });
-
-        function deleteProduct(id) {
-            if (confirm("Are you sure?")) {
-                $.post('manageProduct', { action: 'delete', productId: id }, function() {
-                    location.reload();
-                });
-            }
-        }
-    </script>
-    <script src="js/script.js"></script>
-
+    <script src="js/manage_product_script.js"></script>
 </body>
 </html>
