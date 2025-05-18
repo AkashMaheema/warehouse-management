@@ -54,9 +54,11 @@
                 <li class="list-group-item"><a class="text-decoration-none" href="Inventory">➕ Inventory</a></li>
                 <li class="list-group-item"><a class="text-decoration-none" href="Reorder">➕ Reorder</a></li>
                 <li class="list-group-item"><a class="text-decoration-none" href="ASNManagement">➕ ASNManagement</a></li>
+                <li class="list-group-item"><a class="text-decoration-none" href="manageUser">➕ Manage user</a></li>
             </ul>
         </div>
     </div>
+</div>
 </div>
 </body>
 </html>
