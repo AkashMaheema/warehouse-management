@@ -1,4 +1,4 @@
-package dao;
+package com.warehouse.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import models.ReportCriteria;
 import com.warehouse.config.DBConnection;
+import com.warehouse.models.ReportCriteria;
 
 public class ReportDAO {
     public List<Object[]> generateInventoryReport(ReportCriteria criteria) throws SQLException {

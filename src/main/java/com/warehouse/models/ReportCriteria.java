@@ -1,4 +1,4 @@
-package models;
+package com.warehouse.models;
 
 import java.util.Date;
 
