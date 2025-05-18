@@ -95,7 +95,7 @@
     .sidebar-header {
       position: relative;
       height: 200px; /* adjust height as needed */
-      background-image: url('images/logo5.png'); /* your logo path */
+      background-image: url('images/logo6.png'); /* your logo path */
       background-size: cover;       /* make the image cover the entire div */
       background-position: center;  /* center the image */
       background-repeat: no-repeat;
@@ -187,7 +187,7 @@
           <a href="manageRacks"><i class="bi bi-hdd-stack me-2"></i> Manage Rack</a>
         </li>
         <li class="<%= "manageUser".equals(request.getParameter("activePage")) ? "active" : "" %>">
-           <a href="manageUser.jsp"><i class="bi bi-hdd-stack me-2"></i> Manage Users</a>
+           <a href="manageUser.jsp"><i class="fas fa-users me-2"></i> Manage Users</a>
         </li>
       </ul>
     </li>
@@ -195,7 +195,7 @@
       <a href="reports.jsp"><i class="bi bi-graph-up me-2"></i> Reports</a>
     </li>
     <li class="logout-btn">
-      <a href="login" class="btn btn-danger w-100"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
+      <a href="login.jsp" class="btn btn-danger w-100"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
     </li>
   </ul>
 </div>
