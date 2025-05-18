@@ -80,9 +80,9 @@ body::before {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100%;
+    height: auto;
     width: 100%;
-    background-image: url('../images/background2.webp'); /* Adjusted path if needed */
+    background-color:#F7EFE2;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -103,7 +103,7 @@ body::before {
 
 /* Table container */
 .table-container {
-    display: flex;
+    display: ;
     justify-content: center;
 }
 
@@ -112,14 +112,13 @@ body::before {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border: 2px solid #000;
-    border-radius: 12px;
+    border: 0.2px solid #000;
     overflow: hidden;
 }
 
 .table th {
-    background: #343a40;
-    border: 1px solid #000;
+    background: #40373A;
+    border: 0.2px solid #000;
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
@@ -128,29 +127,13 @@ body::before {
 
 .table td {
     vertical-align: middle;
-    border: 1px solid #000;
+    border: 0.2px solid #000;
 }
 
-/* Rounded corners */
-.table thead tr:first-child th:first-child {
-    border-top-left-radius: 12px;
-}
-
-.table thead tr:first-child th:last-child {
-    border-top-right-radius: 12px;
-}
-
-.table tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 12px;
-}
-
-.table tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 12px;
-}
 
 /* Add button */
 .custom-add-btn {
-    background-color: #4da6ff;
+    background-color: #311F10;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -161,10 +144,36 @@ body::before {
 }
 
 .custom-add-btn:hover {
-    background-color: #80bfff;
+    background-color: #D9B98E;
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     cursor: pointer;
 }
+
+.tab-btn{
+    background-color: #311F10;
+    color: #fff;
+    active-bg: #D9B98E;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tab-btn.active {
+    background-color: #D9B98E; /* Example: dark gray */
+    color: white;
+    border-color: #D9B98E;
+}
+
+
+.tab-btn:hover {
+    background-color: #D9B98E;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {

@@ -1,42 +1,47 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="com.warehouse.models.ASN" %>
+<%@ page import="com.warehouse.dao.ASNDAO" %>
+
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="asn_management" />
+    <jsp:param name="activePage" value="asn_management" />
+    <jsp:param name="content" value="asn_management" />
+</jsp:include>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>ASN Management</title>
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .status-pending {
-            color: #f6c23e;
-            font-weight: 500;
-        }
-        .status-approved {
-            color: #1cc88a;
-            font-weight: 500;
-        }
-        .status-rejected {
-            color: #e74a3b;
-            font-weight: 500;
-        }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1100;
-        }
-    </style>
+            .card {
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .status-pending {
+                color: #f6c23e;
+                font-weight: 500;
+            }
+            .status-approved {
+                color: #1cc88a;
+                font-weight: 500;
+            }
+            .status-rejected {
+                color: #e74a3b;
+                font-weight: 500;
+            }
+            .toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1100;
+            }
+        </style>
 </head>
 <body>
     <div class="toast-container">
@@ -69,13 +74,13 @@
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Advanced Shipping Notices (ASN)</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createASNModal">
+            <button class="custom-add-btn" data-bs-toggle="modal" data-bs-target="#createASNModal">
                 Create New ASN
             </button>
         </div>
 
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header " style="color:white; background:#311F10;">
                 <h4 class="mb-0">ASN List</h4>
             </div>
             <div class="card-body">

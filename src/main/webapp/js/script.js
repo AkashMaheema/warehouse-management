@@ -21,3 +21,4 @@ $('#searchInput').on('keyup', function () {
         $(this).toggle($(this).find('.product-name').text().toLowerCase().indexOf(value) > -1);
     });
 });
+

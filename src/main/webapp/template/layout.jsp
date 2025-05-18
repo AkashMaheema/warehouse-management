@@ -13,13 +13,11 @@
 
   <style>
     :root {
-      --sidebar-width: 250px;
+      --sidebar-width: 220px;
       --header-height: 60px;
-      --sidebar-bg: #343a40;
-      --sidebar-active-bg: #FFC300;
+      --sidebar-bg: #311F10;
+      --sidebar-active-bg: #D9B98E;
     }
-
-
 
      body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -28,18 +26,18 @@
 
     #sidebar {
       position: fixed;
-      top: var(--header-height);
+      top: 0;
       left: 0;
       width: var(--sidebar-width);
-      height: calc(100vh - var(--header-height));
+      height: 100vh;
       background-color: var(--sidebar-bg);
       overflow-y: auto;
-      z-index: 999;
+      z-index: 1001; /* Must be higher than the header's z-index */
     }
 
     #sidebar .sidebar-header {
       color: white;
-      padding: 20px;
+      padding: 10px;
     }
 
     #sidebar ul {
@@ -55,7 +53,7 @@
     }
 
     #sidebar ul li a:hover {
-      color: #FFC300;
+      color: #D9B98E;
     }
 
     #sidebar ul li.active > a {
@@ -65,18 +63,23 @@
 
     #header {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 30px;
+      left: 230px;
       height: var(--header-height);
-      width: 100%;
-      background: #343a40;
+      width: calc(100% - 240px);
+      background: #311F10;
       display: flex;
       justify-content: flex-end;
       align-items: center;
       padding: 0 20px;
       z-index: 1000;
       color: white;
+      border-top-right-radius: 30px;
+      border-bottom-right-radius: 30px;
+      border-top-left-radius: 30px;
+      border-bottom-left-radius: 30px;
     }
+
 
     #content {
       position: absolute;
@@ -86,12 +89,13 @@
       height: calc(100vh - var(--header-height));
       overflow-y: auto;
       padding: 20px;
+      scrollbar-width: none; /* Firefox */
     }
 
     .sidebar-header {
       position: relative;
       height: 200px; /* adjust height as needed */
-      background-image: url('images/logo3.png'); /* your logo path */
+      background-image: url('images/logo5.png'); /* your logo path */
       background-size: cover;       /* make the image cover the entire div */
       background-position: center;  /* center the image */
       background-repeat: no-repeat;
@@ -148,13 +152,16 @@
       <a href="dashboard.jsp"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
     </li>
     <li class="<%= "inventory".equals(request.getParameter("activePage")) ? "active" : "" %>">
-      <a href="inventory.jsp"><i class="bi bi-box-seam me-2"></i> Inventory</a>
+      <a href="Inventory"><i class="bi bi-box-seam me-2"></i> Inventory</a>
     </li>
     <li class="<%= "supply".equals(request.getParameter("activePage")) ? "active" : "" %>">
-      <a href="supply.jsp"><i class="bi bi-truck me-2"></i> Supply</a>
+      <a href="Stocks"><i class="bi bi-truck me-2"></i> Supply</a>
     </li>
     <li class="<%= "orders".equals(request.getParameter("activePage")) ? "active" : "" %>">
-      <a href="orders.jsp"><i class="bi bi-cart me-2"></i> Orders</a>
+      <a href="manageOrders.jsp"><i class="bi bi-cart me-2"></i> Orders</a>
+    </li>
+    <li class="<%= "orders".equals(request.getParameter("activePage")) ? "active" : "" %>">
+      <a href="ASNManagement"><i class="bi bi-file-earmark-text me-2"></i> ASN Management</a>
     </li>
     <li>
       <a href="#moreSubmenu" data-bs-toggle="collapse" class="dropdown-toggle">
@@ -178,9 +185,6 @@
         </li>
         <li class="<%= "manageRacks".equals(request.getParameter("activePage")) ? "active" : "" %>">
           <a href="manageRacks"><i class="bi bi-hdd-stack me-2"></i> Manage Rack</a>
-        </li>
-        <li class="<%= "Stocks".equals(request.getParameter("activePage")) ? "active" : "" %>">
-          <a href="Stocks"><i class="bi bi-bar-chart me-2"></i> Manage Stocks</a>
         </li>
       </ul>
     </li>
