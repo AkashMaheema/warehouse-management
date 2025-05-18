@@ -29,7 +29,7 @@
     <div class="container">
             <h2 class="category-heading">Stock Approvals</h2>
 
-     <a class="btn btn-primary mb-3 text-decoration-none" href="StockIn">Add Stock</a>
+     <a class="btn btn-primary mb-3 custom-add-btn" href="StockIn">Add Stock</a>
 
 
         <c:if test="${not empty successMessage}">
