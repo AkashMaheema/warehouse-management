@@ -1,4 +1,4 @@
-package servlets;
+package com.warehouse.controllers;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServlet;
 import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import dao.ReportDAO;
-import models.ReportCriteria;
+import com.warehouse.dao.ReportDAO;
+import com.warehouse.models.ReportCriteria;
 
 @WebServlet("/ReportServlet")
 public class ReportServlet extends HttpServlet {
@@ -69,7 +69,7 @@ public class ReportServlet extends HttpServlet {
                 request.getRequestDispatcher("reports.jsp").forward(request, response);
             }
         } else if ("export".equals(action)) {
-            // Handle export to CSV or Excel
+            // new  Handle export to CSV or Excel
             // This would be similar to the generate action but would write directly to response output stream
         }
     }
