@@ -2,6 +2,7 @@ package com.warehouse.dao;
 
 import com.warehouse.config.DBConnection;
 import com.warehouse.models.User;
+import com.warehouse.utils.SecurityUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,14 +12,19 @@ public class UserDAO {
 
     // Add a new user to the database
     public boolean add(String username, String password, String role) {
+        // Validate username (not only numbers)
+        if (!SecurityUtils.isValidUsername(username)) {
+            return false;
+        }
+
         String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            // In a production environment, you should hash the password before storing
-            stmt.setString(2, password);
+            // Hash the password before storing
+            stmt.setString(2, SecurityUtils.hashPassword(password));
             stmt.setString(3, role);
 
             int rowsAffected = stmt.executeUpdate();
@@ -43,7 +49,7 @@ public class UserDAO {
                 User user = new User();
                 user.setUserId(rs.getInt("user_id"));
                 user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
+                user.setPassword("********"); // Don't expose hashed password in UI
                 user.setRole(rs.getString("role"));
                 users.add(user);
             }
@@ -68,7 +74,7 @@ public class UserDAO {
                     User user = new User();
                     user.setUserId(rs.getInt("user_id"));
                     user.setUsername(rs.getString("username"));
-                    user.setPassword(rs.getString("password"));
+                    user.setPassword(rs.getString("password")); // Keep hashed password for internal use
                     user.setRole(rs.getString("role"));
                     return user;
                 }
@@ -82,15 +88,34 @@ public class UserDAO {
 
     // Update an existing user
     public boolean update(int userId, String username, String password, String role) {
-        String sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE user_id = ?";
+        // Validate username (not only numbers)
+        if (!SecurityUtils.isValidUsername(username)) {
+            return false;
+        }
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // Check if password has been changed
+        User existingUser = getById(userId);
+        String sql;
 
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            stmt.setString(3, role);
-            stmt.setInt(4, userId);
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement stmt;
+
+            // If password field is empty or contains placeholder, keep existing password
+            if (password == null || password.isEmpty() || password.equals("********")) {
+                sql = "UPDATE users SET username = ?, role = ? WHERE user_id = ?";
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, username);
+                stmt.setString(2, role);
+                stmt.setInt(3, userId);
+            } else {
+                // Update with new password
+                sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE user_id = ?";
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, username);
+                stmt.setString(2, SecurityUtils.hashPassword(password));
+                stmt.setString(3, role);
+                stmt.setInt(4, userId);
+            }
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -117,5 +142,36 @@ public class UserDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Authenticate a user (for login)
+    public User authenticate(String username, String password) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedHash = rs.getString("password");
+
+                    // Verify the password
+                    if (SecurityUtils.verifyPassword(password, storedHash)) {
+                        User user = new User();
+                        user.setUserId(rs.getInt("user_id"));
+                        user.setUsername(rs.getString("username"));
+                        user.setPassword("********"); // Don't expose hashed password
+                        user.setRole(rs.getString("role"));
+                        return user;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null; // Authentication failed
     }
 }
