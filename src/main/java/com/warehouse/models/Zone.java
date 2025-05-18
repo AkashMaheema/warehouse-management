@@ -12,6 +12,9 @@ public class Zone {
         this.zoneCapacity = zoneCapacity;
         this.usedCapacity = usedCapacity;
     }
+    public Zone() {
+        // Default constructor needed for JSP EL
+    }
 
     // Getters and setters
     public int getZoneId() {

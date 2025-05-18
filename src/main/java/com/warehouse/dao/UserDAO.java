@@ -1,7 +1,10 @@
 package com.warehouse.dao;
 import com.warehouse.config.DBConnection;
 import com.warehouse.models.User;
+import com.warehouse.utils.PasswordUtils;
 import com.warehouse.utils.SecurityUtils;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +128,7 @@ public class UserDAO {
                     String storedHash = rs.getString("password");
 
                     // Verify the password
-                    if (SecurityUtils.verifyPassword(password, storedHash)) {
+                    if (PasswordUtils.verifyPassword(password, storedHash)) {
                         User user = new User();
                         user.setUserId(rs.getInt("user_id"));
                         user.setUsername(rs.getString("username"));
@@ -156,7 +159,10 @@ public class UserDAO {
 
             stmt.setString(1, username);
             // Hash the password before storing
-            stmt.setString(2, SecurityUtils.hashPassword(password));
+            // Hash password and create new viewer user
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+            stmt.setString(2, hashedPassword);
             stmt.setString(3, role);
 
             int rowsAffected = stmt.executeUpdate();
