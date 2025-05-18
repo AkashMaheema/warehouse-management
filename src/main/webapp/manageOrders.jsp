@@ -11,6 +11,7 @@
     <meta charset="UTF-8">
     <title>Stock Out Requests</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
         .badge-pending { background-color: #ffc107; color: #000; }
         .badge-approved { background-color: #007bff; color: #fff; }
@@ -25,7 +26,6 @@
             <!-- Add Order Button -->
             <div class="d-flex justify-content-end mb-3">
                 <a class="btn btn-primary mb-3 mr-2 custom-add-btn" href="StockOut?action=new">Add New Order</a>
-                <a class="btn btn-primary mb-3 custom-add-btn" href="StockOut?action=pending">Add New Order</a>
             </div>
 
             <!-- Tab Buttons -->

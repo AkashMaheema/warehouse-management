@@ -1,10 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="ZoneUI" />
+    <jsp:param name="activePage" value="ZoneUI" />
+    <jsp:param name="content" value="ZoneUI" />
+</jsp:include>
 <html>
 <head>
     <title>Zone Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
     <style>
         :root {
             --primary-color: #4361ee;
@@ -218,9 +224,8 @@
         }
     </style>
 </head>
-<body class="container py-4">
-<div class="animate__animated animate__fadeIn">
-    <h1 class="text-center mb-5 animate__animated animate__fadeInDown">Zone Management</h1>
+<div class="container">
+        <h2 class="category-heading">Zone Management</h2>
 
     <div class="row">
         <!-- Add Zone Card -->
