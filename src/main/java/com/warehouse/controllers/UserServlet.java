@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet("/manageUser")
@@ -34,9 +35,13 @@ public class UserServlet extends HttpServlet {
                 }
 
                 // Check for duplicate username (case-insensitive)
-                if (isDuplicateUsername(username, -1, dao)) {
-                    errorMessage = "Username '" + username + "' already exists. Please choose a different username.";
-                    break;
+                try {
+                    if (isDuplicateUsername(username, -1, dao)) {
+                        errorMessage = "Username '" + username + "' already exists. Please choose a different username.";
+                        break;
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
                 }
 
                 // Add new user to database
@@ -61,16 +66,24 @@ public class UserServlet extends HttpServlet {
                 }
 
                 // Check for duplicate username (case-insensitive), excluding current user
-                if (isDuplicateUsername(username, id, dao)) {
-                    errorMessage = "Username '" + username + "' already exists. Please choose a different username.";
-                    break;
+                try {
+                    if (isDuplicateUsername(username, id, dao)) {
+                        errorMessage = "Username '" + username + "' already exists. Please choose a different username.";
+                        break;
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
                 }
 
                 // Update user in database
-                if (!dao.update(id, username, password, role)) {
-                    errorMessage = "Failed to update user. Please try again.";
-                } else {
-                    successMessage = "User '" + username + "' updated successfully!";
+                try {
+                    if (!dao.update(id, username, password, role)) {
+                        errorMessage = "Failed to update user. Please try again.";
+                    } else {
+                        successMessage = "User '" + username + "' updated successfully!";
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
                 }
                 break;
 
@@ -94,7 +107,12 @@ public class UserServlet extends HttpServlet {
         }
 
         // Get updated user list
-        List<User> users = dao.getAll();
+        List<User> users = null;
+        try {
+            users = dao.getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         req.setAttribute("users", users);
 
         // Set appropriate message attributes
@@ -112,7 +130,12 @@ public class UserServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         UserDAO dao = new UserDAO();
-        List<User> users = dao.getAll();
+        List<User> users = null;
+        try {
+            users = dao.getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         req.setAttribute("users", users);
 
@@ -129,7 +152,7 @@ public class UserServlet extends HttpServlet {
      * @param dao The UserDAO instance
      * @return true if the username already exists, false otherwise
      */
-    private boolean isDuplicateUsername(String username, int currentUserId, UserDAO dao) {
+    private boolean isDuplicateUsername(String username, int currentUserId, UserDAO dao) throws SQLException {
         List<User> allUsers = dao.getAll();
 
         for (User user : allUsers) {
