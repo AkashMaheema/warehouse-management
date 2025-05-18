@@ -77,6 +77,22 @@ public class ZoneDAO {
         return list;
     }
 
+    public int getZoneCapacity(int zoneId) {
+        int capacity = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT zone_capacity FROM zones WHERE zone_id = ?")) {
+            stmt.setInt(1, zoneId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                capacity = rs.getInt("zone_capacity");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return capacity;
+    }
+
+
     public void updateZoneUsedCapacity(int zoneId) {
         int totalUsed = 0;
         try (Connection conn = DBConnection.getConnection()) {
