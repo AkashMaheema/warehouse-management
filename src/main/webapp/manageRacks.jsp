@@ -58,7 +58,7 @@
     <c:forEach var="zone" items="${sortedZones}">
         <tr>
             <td colspan="5" class="table-secondary fw-bold">
-                Zone: ${zone.zoneName} (ID: ${zone.zoneId})
+                Zone: ${zone.zoneName}
             </td>
         </tr>
         <c:forEach var="r" items="${zoneRackMap[zone.zoneId]}">

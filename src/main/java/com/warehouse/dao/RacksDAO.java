@@ -225,5 +225,27 @@ public class RacksDAO {
         }
         return total;
     }
+    public List<Rack> getRacksByZone(int zoneId) {
+        List<Rack> list = new ArrayList<>();
+        String sql = "SELECT * FROM racks WHERE zone_id = ? ORDER BY rack_id ASC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, zoneId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Rack rack = new Rack(
+                        rs.getInt("rack_id"),
+                        rs.getInt("zone_id"),
+                        rs.getString("rack_name"),
+                        rs.getInt("rack_capacity"),
+                        rs.getInt("used_capacity")
+                );
+                list.add(rack);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
 }
