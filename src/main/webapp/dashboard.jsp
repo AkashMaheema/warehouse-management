@@ -83,10 +83,10 @@
            transform: translateY(-5px);
        }
 
-       .card-stat.total { border-left-color: #311F10; }
-       .card-stat.available { border-left-color: #311F10; }
-       .card-stat.warning { border-left-color: #311F10; }
-       .card-stat.danger { border-left-color: #311F10; }
+       .card-stat.total { border-left-color: #156082; }
+       .card-stat.available { border-left-color: #156082; }
+       .card-stat.warning { border-left-color: #156082; }
+       .card-stat.danger { border-left-color: #156082; }
 
        .action-btn {
            display: flex;
@@ -105,7 +105,7 @@
        }
 
        .action-btn:hover {
-           background: linear-gradient(135deg, #311F10, #D9B98E);
+           background: linear-gradient(135deg, #0b2d3c, #156082, #4a96b3);
            color: white;
            transform: translateY(-3px);
            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -272,7 +272,7 @@
               <div class="row">
                 <div class="col-12 mb-3">
                   <div class="card">
-                    <div class="card-header" style="background-color:#311F10; color: white;">
+                    <div class="card-header" style="background-color:#156082; color: white;">
                       <h3 class="h6 mb-0"><i class="bi bi-box-arrow-in-down"></i> Recent Inbound</h3>
                     </div>
                     <ul class="list-group list-group-flush">
@@ -290,7 +290,7 @@
                 </div>
                 <div class="col-12">
                   <div class="card">
-                    <div class="card-header" style="background-color:#311F10; color: white;">
+                    <div class="card-header" style="background-color:#156082; color: white;">
                       <h3 class="h6 mb-0"><i class="bi bi-box-arrow-up"></i> Recent Outbound</h3>
                     </div>
                     <ul class="list-group list-group-flush">

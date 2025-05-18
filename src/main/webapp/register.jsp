@@ -8,18 +8,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                        url('images/background2.webp');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-        }
+                   background-image: url('https://img.freepik.com/premium-photo/sunset-rice-field-with-mountains-background_808092-2110.jpg');
+                   background-size: cover;
+                   background-position: center;
+                   background-repeat: no-repeat;
+                   background-attachment: fixed;
+                   min-height: 100vh;
+                   margin: 0;
+                   display: flex;
+                   align-items: center;
+                   justify-content: center;
+               }
         .card {
-            background-color: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-        }
+                  background-color: rgba(33, 33, 33, 0.8); /* dark gray with 80% opacity */
+                  border-radius: 10px;
+                  color:white;
+              }
+         .btn-primary {
+             background-color: #267f37;
+             border-color: #27873a;
+             color: white;
+         }
+
+         .btn-primary:hover {
+             background-color: #2ba432; /* slightly darker green */
+             border-color: #2ba432;
+             cursor: pointer;
+         }
+
     </style>
 </head>
 <body>
