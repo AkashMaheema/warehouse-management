@@ -100,7 +100,7 @@ public class StockOutServlet extends HttpServlet {
         List<StockOut> stockOuts = dao.getStockOuts();
 
         request.setAttribute("stockOutList", stockOuts);
-        request.getRequestDispatcher("stock_out_list.jsp").forward(request, response);
+        request.getRequestDispatcher("manageOrders.jsp").forward(request, response);
     }
 
     private void showPendingApprovals(HttpServletRequest request, HttpServletResponse response)
