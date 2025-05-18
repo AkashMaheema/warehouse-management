@@ -69,49 +69,4 @@ public class SecurityUtils {
         }
     }
 
-    /**
-     * Verify a password against a stored hash
-     * @param password The password to verify
-     * @param storedHash The stored password hash
-     * @return true if password matches, false otherwise
-     */
-    public static boolean verifyPassword(String password, String storedHash) {
-        try {
-            // Decode the stored hash
-            byte[] combined = Base64.getDecoder().decode(storedHash);
-
-            // Extract salt (first 16 bytes)
-            byte[] salt = new byte[16];
-            System.arraycopy(combined, 0, salt, 0, salt.length);
-
-            // Create MessageDigest instance for SHA-256
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-            // Add salt to digest
-            md.update(salt);
-
-            // Get the hashed password
-            byte[] hashedPassword = md.digest(password.getBytes());
-
-            // Compare hashed password with stored hash
-            byte[] storedHashBytes = new byte[combined.length - salt.length];
-            System.arraycopy(combined, salt.length, storedHashBytes, 0, storedHashBytes.length);
-
-            // Compare length and content
-            if (hashedPassword.length != storedHashBytes.length) {
-                return false;
-            }
-
-            for (int i = 0; i < hashedPassword.length; i++) {
-                if (hashedPassword[i] != storedHashBytes[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }

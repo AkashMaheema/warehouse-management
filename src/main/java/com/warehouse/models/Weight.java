@@ -9,6 +9,10 @@ public class Weight {
         this.weightValue = weightValue;
     }
 
+    public Weight() {
+
+    }
+
     // Getters and Setters
     public int getWeightId() {
         return weightId;
