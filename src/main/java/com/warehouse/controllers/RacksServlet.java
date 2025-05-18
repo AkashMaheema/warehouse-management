@@ -31,8 +31,10 @@ public class RacksServlet extends HttpServlet {
 
                     // Fetch current total rack capacity in the target zone
                     int currentTotalRackCapacity = racksDAO.getTotalRackCapacityInZone(newZoneId);
+                    System.out.println("currentTotalRackCapacity" + currentTotalRackCapacity);
                     int zoneTotalCapacity = zoneDAO.getZoneCapacity(newZoneId);
-
+                    System.out.println("zoneTotalCapacity" + zoneTotalCapacity);
+                    System.out.println(currentTotalRackCapacity + newRackCapacity);
                     // Check if adding the new rack would exceed the zone's capacity
                     if ((currentTotalRackCapacity + newRackCapacity) > zoneTotalCapacity) {
                         req.setAttribute("warning", "Adding this rack will exceed the zone's capacity!");
