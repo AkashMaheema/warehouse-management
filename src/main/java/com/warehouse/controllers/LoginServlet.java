@@ -26,7 +26,7 @@ public class LoginServlet extends HttpServlet {
         // Check if user is already logged in
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("dashboard.jsp");
         } else {
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
@@ -50,11 +50,11 @@ public class LoginServlet extends HttpServlet {
             // Redirect based on specific role
             if ("admin".equals(role)) {
                 // Admin specific redirection
-                response.sendRedirect("index.jsp");
+                response.sendRedirect("dashboard.jsp");
             }
             else if ("stock_manager".equals(role)) {
                 // Stock Manager specific redirection
-                response.sendRedirect("index.jsp");
+                response.sendRedirect("dashboard.jsp");
             }
             else if ("viewer".equals(role)) {
                 // Viewer specific redirection
