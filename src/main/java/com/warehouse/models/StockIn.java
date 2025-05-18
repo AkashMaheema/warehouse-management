@@ -76,4 +76,6 @@ public class StockIn {
     public void setSupplierName(String supplierName) {
         this.supplierName = supplierName;
     }
+
+
 }

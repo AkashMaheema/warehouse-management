@@ -1,5 +1,7 @@
 package com.warehouse.models;
 
+import java.sql.Date;
+
 public class ASNItem {
     private int asnItemId;
     private int asnId;
@@ -8,16 +10,20 @@ public class ASNItem {
     private int weightId;
     private Weight weight;
     private int expectedQuantity;
+    private int categoryId;
+    private Date expiryDate;
 
     // Constructors
     public ASNItem() {
     }
 
-    public ASNItem(int asnId, int productId, int weightId, int expectedQuantity) {
+    public ASNItem(int asnId, int productId, int weightId, int expectedQuantity, int categoryId, Date expiryDate) {
         this.asnId = asnId;
         this.productId = productId;
         this.weightId = weightId;
         this.expectedQuantity = expectedQuantity;
+        this.categoryId = categoryId;
+        this.expiryDate = expiryDate;
     }
 
     // Getters and Setters
@@ -77,6 +83,22 @@ public class ASNItem {
         this.expectedQuantity = expectedQuantity;
     }
 
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
     @Override
     public String toString() {
         return "ASNItem{" +
@@ -85,6 +107,8 @@ public class ASNItem {
                 ", productId=" + productId +
                 ", weightId=" + weightId +
                 ", expectedQuantity=" + expectedQuantity +
+                ", categoryId=" + categoryId +
+                ", expiryDate=" + expiryDate +
                 '}';
     }
 }

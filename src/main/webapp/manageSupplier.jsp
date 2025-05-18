@@ -1,41 +1,59 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="com.warehouse.models.Supplier" %>
-<%@ page import="com.warehouse.dao.SupplierDAO" %>
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.warehouse.models.Category" %>
+<%@ page import="com.warehouse.dao.CategoryDAO" %>
+
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="manageSupplier" />
+    <jsp:param name="activePage" value="manageSupplier" />
+    <jsp:param name="content" value="manageSupplier" />
+</jsp:include>
 
 <html>
 <head>
     <title>Manage Suppliers</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="container mt-4">
-    <h2>Supplier Management</h2>
+    <h2 class="supplier-heading">Supplier Management</h2>
+    <div class="d-flex justify-content-end mb-3">
+         <input type="text" id="searchInput" class="form-control" style="width: 250px;" placeholder="Search by supplier name...">
+    </div>
 
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Add Supplier</button>
+    <button class="custom-add-btn mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Add Supplier</button>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>ID</th><th>Name</th><th>Contact Person</th><th>Phone</th><th>Email</th><th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="supplierTable">
-            <c:forEach var="s" items="${suppliers}">
-                <tr data-id="${s.supplierId}">
-                    <td>${s.supplierId}</td>
-                    <td class="name">${s.name}</td>
-                    <td class="contact">${s.contactPerson}</td>
-                    <td class="phone">${s.phone}</td>
-                    <td class="email">${s.email}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning editBtn">Edit</button>
-                        <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
-                    </td>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
                 </tr>
-            </c:forEach>
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="supplierTable">
+                <c:forEach var="s" items="${suppliers}">
+                    <tr data-id="${s.supplierId}">
+                        <td>${s.supplierId}</td>
+                        <td class="name">${s.name}</td>
+                        <td class="contact">${s.contactPerson}</td>
+                        <td class="phone">${s.phone}</td>
+                        <td class="email">${s.email}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning editBtn">Edit</button>
+                            <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
 
     <!-- Add Modal -->
     <div class="modal fade" id="addModal" tabindex="-1">
@@ -76,55 +94,6 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        $('#addForm').submit(function(e) {
-            e.preventDefault();
-            $.post('manageSupplier', {
-                action: 'create',
-                name: $(this).find('[name=name]').val(),
-                contactPerson: $(this).find('[name=contactPerson]').val(),
-                phone: $(this).find('[name=phone]').val(),
-                email: $(this).find('[name=email]').val()
-            }, function() {
-                location.reload();
-            });
-        });
-
-        $('.editBtn').click(function() {
-            const row = $(this).closest('tr');
-            $('#editForm [name=id]').val(row.data('id'));
-            $('#editForm [name=name]').val(row.find('.name').text());
-            $('#editForm [name=contactPerson]').val(row.find('.contact').text());
-            $('#editForm [name=phone]').val(row.find('.phone').text());
-            $('#editForm [name=email]').val(row.find('.email').text());
-            new bootstrap.Modal(document.getElementById('editModal')).show();
-        });
-
-        $('#editForm').submit(function(e) {
-            e.preventDefault();
-            $.post('manageSupplier', {
-                action: 'update',
-                id: $(this).find('[name=id]').val(),
-                name: $(this).find('[name=name]').val(),
-                contactPerson: $(this).find('[name=contactPerson]').val(),
-                phone: $(this).find('[name=phone]').val(),
-                email: $(this).find('[name=email]').val()
-            }, function() {
-                location.reload();
-            });
-        });
-
-        $('.deleteBtn').click(function() {
-            if (confirm("Are you sure?")) {
-                const id = $(this).closest('tr').data('id');
-                $.post('manageSupplier', {
-                    action: 'delete',
-                    id: id
-                }, function() {
-                    location.reload();
-                });
-            }
-        });
-    </script>
+    <script src="js/manage_supplier_script.js"></script>
 </body>
 </html>
