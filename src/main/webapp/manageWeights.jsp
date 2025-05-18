@@ -1,19 +1,29 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="com.warehouse.models.Weight" %>
-<%@ page import="com.warehouse.dao.WeightDAO" %>
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.warehouse.models.Category" %>
+<%@ page import="com.warehouse.dao.CategoryDAO" %>
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="manageWeights" />
+    <jsp:param name="activePage" value="manageWeights" />
+    <jsp:param name="content" value="manageWeights" />
+</jsp:include>
 
 <html>
 <head>
     <title>Manage Weights</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="css/style.css">
+
 </head>
-<body class="container mt-4">
-    <h2>Weight Management</h2>
+<body>
+<div class="container">
+        <h2 class="category-heading">Weight Management</h2>
 
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Add Weight</button>
+     <button class="btn btn-primary mb-3 custom-add-btn" data-bs-toggle="modal" data-bs-target="#addModal">Add Weight</button>
 
+    <div class="table-container">
     <table class="table table-bordered">
         <thead>
             <tr><th>ID</th><th>Weight</th><th>Actions</th></tr>
@@ -31,6 +41,7 @@
             </c:forEach>
         </tbody>
     </table>
+    </dive>
 
     <!-- Add Modal -->
     <div class="modal fade" id="addModal" tabindex="-1">
@@ -62,6 +73,8 @@
             </form>
         </div>
     </div>
+</div>
+</div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,6 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*, com.warehouse.config.DBConnection" %>
 <%@ page import="java.util.*" %>
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="dashboard" />
+    <jsp:param name="activePage" value="index" />
+    <jsp:param name="content" value="index" />
+</jsp:include>
 <%
     Connection conn = DBConnection.getConnection();
     int productCount = 0, lowStockCount = 0;
@@ -52,5 +57,7 @@
             </ul>
         </div>
     </div>
+</div>
 </body>
 </html>
+
