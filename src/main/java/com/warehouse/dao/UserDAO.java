@@ -2,6 +2,8 @@ package com.warehouse.dao;
 import com.warehouse.config.DBConnection;
 import com.warehouse.models.User;
 import com.warehouse.utils.SecurityUtils;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,7 +158,10 @@ public class UserDAO {
 
             stmt.setString(1, username);
             // Hash the password before storing
-            stmt.setString(2, SecurityUtils.hashPassword(password));
+            // Hash password and create new viewer user
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+            stmt.setString(2, hashedPassword);
             stmt.setString(3, role);
 
             int rowsAffected = stmt.executeUpdate();
