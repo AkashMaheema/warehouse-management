@@ -83,10 +83,10 @@
            transform: translateY(-5px);
        }
 
-       .card-stat.total { border-left-color: var(--primary-color); }
-       .card-stat.available { border-left-color: var(--success-color); }
-       .card-stat.warning { border-left-color: var(--warning-color); }
-       .card-stat.danger { border-left-color: var(--danger-color); }
+       .card-stat.total { border-left-color: #311F10; }
+       .card-stat.available { border-left-color: #311F10; }
+       .card-stat.warning { border-left-color: #311F10; }
+       .card-stat.danger { border-left-color: #311F10; }
 
        .action-btn {
            display: flex;
@@ -105,7 +105,7 @@
        }
 
        .action-btn:hover {
-           background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+           background: linear-gradient(135deg, #311F10, #D9B98E);
            color: white;
            transform: translateY(-3px);
            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -225,25 +225,25 @@
                     <h2 class="h4 mb-4"><i class="bi bi-lightning"></i> Quick Actions</h2>
                     <div class="row g-3">
                         <div class="col-md-2 col-4">
-                            <a href="addStock.jsp" class="action-btn">
+                            <a href="StockIn" class="action-btn">
                                 <i class="bi bi-plus-circle"></i>
                                 <span>Add Stock</span>
                             </a>
                         </div>
                         <div class="col-md-2 col-4">
-                            <a href="createOrder.jsp" class="action-btn">
+                            <a href="manageOrders.jsp" class="action-btn">
                                 <i class="bi bi-file-earmark-plus"></i>
                                 <span>Create Order</span>
                             </a>
                         </div>
                         <div class="col-md-2 col-4">
-                            <a href="inventory.jsp" class="action-btn">
+                            <a href="Inventory" class="action-btn">
                                 <i class="bi bi-search"></i>
                                 <span>View Inventory</span>
                             </a>
                         </div>
                         <div class="col-md-2 col-4">
-                            <a href="orders.jsp" class="action-btn">
+                            <a href="manageOrders.jsp" class="action-btn">
                                 <i class="bi bi-cart-check"></i>
                                 <span>View Orders</span>
                             </a>
@@ -272,7 +272,7 @@
               <div class="row">
                 <div class="col-12 mb-3">
                   <div class="card">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header" style="background-color:#311F10; color: white;">
                       <h3 class="h6 mb-0"><i class="bi bi-box-arrow-in-down"></i> Recent Inbound</h3>
                     </div>
                     <ul class="list-group list-group-flush">
@@ -290,7 +290,7 @@
                 </div>
                 <div class="col-12">
                   <div class="card">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header" style="background-color:#311F10; color: white;">
                       <h3 class="h6 mb-0"><i class="bi bi-box-arrow-up"></i> Recent Outbound</h3>
                     </div>
                     <ul class="list-group list-group-flush">

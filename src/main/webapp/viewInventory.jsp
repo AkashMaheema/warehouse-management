@@ -3,9 +3,9 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <jsp:include page="template/layout.jsp">
-    <jsp:param name="title" value="manageCategory" />
-    <jsp:param name="activePage" value="manageCategory" />
-    <jsp:param name="content" value="manageCategory" />
+    <jsp:param name="title" value="Inventory" />
+    <jsp:param name="activePage" value="viewInventory" />
+    <jsp:param name="content" value="viewInventory" />
 </jsp:include>
 
 <!DOCTYPE html>

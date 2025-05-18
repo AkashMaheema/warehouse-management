@@ -112,13 +112,13 @@ body::before {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border: 2px solid #000;
+    border: 0.2px solid #000;
     overflow: hidden;
 }
 
 .table th {
-    background: #343a40;
-    border: 1px solid #000;
+    background: #40373A;
+    border: 0.2px solid #000;
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
@@ -127,7 +127,7 @@ body::before {
 
 .table td {
     vertical-align: middle;
-    border: 1px solid #000;
+    border: 0.2px solid #000;
 }
 
 
