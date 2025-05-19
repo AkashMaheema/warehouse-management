@@ -1,6 +1,7 @@
 package com.warehouse.dao;
 import com.warehouse.config.DBConnection;
 import com.warehouse.models.User;
+import com.warehouse.utils.PasswordUtils;
 import com.warehouse.utils.SecurityUtils;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -127,7 +128,7 @@ public class UserDAO {
                     String storedHash = rs.getString("password");
 
                     // Verify the password
-                    if (SecurityUtils.verifyPassword(password, storedHash)) {
+                    if (PasswordUtils.verifyPassword(password, storedHash)) {
                         User user = new User();
                         user.setUserId(rs.getInt("user_id"));
                         user.setUsername(rs.getString("username"));

@@ -1,13 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<jsp:include page="template/layout.jsp">
+    <jsp:param name="title" value="manageOrders" />
+    <jsp:param name="activePage" value="manageOrders" />
+    <jsp:param name="content" value="manageOrders" />
+</jsp:include>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Stock Out</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
         .loading {
             display: none;
@@ -147,6 +153,7 @@
     <script>
         // Global data
         const inventoryData = JSON.parse('${inventoryListJson}');
+        console.log(inventoryData);
         const productWeightMap = {};
         let rowCount = 1;
 
