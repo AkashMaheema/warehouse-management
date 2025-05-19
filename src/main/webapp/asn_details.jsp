@@ -63,7 +63,7 @@
 <body>
     <div class="container py-5">
         <div class="card">
-            <div class="card-header" style="color:white; background:#311F10;">
+            <div class="card-header" style="color:white; background:#156082;">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">ASN Details - ASN-${asn.asnId}</h4>
                     <a href="ASNManagement" class="btn btn-light btn-sm">Back to List</a>

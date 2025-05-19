@@ -5,25 +5,53 @@
 <head>
     <meta charset="UTF-8">
     <title>Araliya Warehouse - Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                        url('images/background2.webp');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
-            display: flex;
-            align-items: center;
+       body {
+           background-image: url('https://img.freepik.com/premium-photo/sunset-rice-field-with-mountains-background_808092-2110.jpg');
+           background-size: cover;
+           background-position: center;
+           background-repeat: no-repeat;
+           background-attachment: fixed;
+           min-height: 100vh;
+           margin: 0;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+       }
+
+       .card {
+           background-color: rgba(33, 33, 33, 0.8); /* dark gray with 80% opacity */
+           border-radius: 10px;
+           color:white;
+       }
+
+       .btn-primary {
+           background-color: #267f37;
+           border-color: #27873a;
+           color: white;
+       }
+
+       .btn-primary:hover {
+           background-color: #2ba432; /* slightly darker green */
+           border-color: #2ba432;
+           cursor: pointer;
+       }
+
+
+        .form-label {
+            font-weight: 500;
         }
-        .card {
-            background-color: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
+
+        h3 {
+            font-weight: bold;
         }
-        .btn-primary {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
+        .text-muted {
+            color: white !important;
         }
+
     </style>
 </head>
 <body>
@@ -34,9 +62,8 @@
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
                             <h3>Araliya Warehouse</h3>
-                            <p class="text-muted">Warehouse Management System</p>
+                            <p class="text-muted" >Warehouse Management System</p>
                         </div>
-
 
                         <c:if test="${not empty error}">
                             <div class="alert alert-danger">${error}</div>
@@ -58,11 +85,13 @@
                                 <p>Don't have an account? <a href="register.jsp" class="text-decoration-none">Register as viewer</a></p>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

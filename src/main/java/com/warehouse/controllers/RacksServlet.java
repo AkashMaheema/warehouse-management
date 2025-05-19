@@ -31,8 +31,10 @@ public class RacksServlet extends HttpServlet {
 
                     // Fetch current total rack capacity in the target zone
                     int currentTotalRackCapacity = racksDAO.getTotalRackCapacityInZone(newZoneId);
+                    System.out.println("currentTotalRackCapacity" + currentTotalRackCapacity);
                     int zoneTotalCapacity = zoneDAO.getZoneCapacity(newZoneId);
-
+                    System.out.println("zoneTotalCapacity" + zoneTotalCapacity);
+                    System.out.println(currentTotalRackCapacity + newRackCapacity);
                     // Check if adding the new rack would exceed the zone's capacity
                     if ((currentTotalRackCapacity + newRackCapacity) > zoneTotalCapacity) {
                         req.setAttribute("warning", "Adding this rack will exceed the zone's capacity!");
@@ -144,21 +146,41 @@ public class RacksServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        RacksDAO racksDAO = new RacksDAO();
-        ZoneDAO zoneDAO = new ZoneDAO();
+        String viewType = req.getParameter("view");
 
-        // Fetch all racks from the database
-        List<Rack> racks = racksDAO.getAll();
+        if ("grid".equals(viewType)) {
+            // Handle rack grid view request
+            int zoneId = Integer.parseInt(req.getParameter("zoneId"));
+            RacksDAO racksDAO = new RacksDAO();
+            ZoneDAO zoneDAO = new ZoneDAO();
 
-        // Fetch all zones to populate the dropdown
-        List<Zone> zones = zoneDAO.getAll();
+            List<Rack> racks = racksDAO.getRacksByZone(zoneId);
+            Zone zone = zoneDAO.getZoneById(zoneId);
 
-        // Set attributes for the JSP page
-        req.setAttribute("racks", racks);
-        req.setAttribute("zones", zones);
+            req.setAttribute("racks", racks);
+            req.setAttribute("zoneName", zone.getZoneName());
+            RequestDispatcher dispatcher = req.getRequestDispatcher("/RackGrid.jsp");
+            dispatcher.forward(req, res);
+        } else {
+            // Handle default racks management view
+            RacksDAO racksDAO = new RacksDAO();
+            ZoneDAO zoneDAO = new ZoneDAO();
 
-        // Forward to the manageRacks.jsp page
-        RequestDispatcher dispatcher = req.getRequestDispatcher("/manageRacks.jsp");
-        dispatcher.forward(req, res);
+            // Fetch all racks from the database
+            List<Rack> racks = racksDAO.getAll();
+
+            // Fetch all zones to populate the dropdown
+            List<Zone> zones = zoneDAO.getAll();
+
+            // Set attributes for the JSP page
+            req.setAttribute("racks", racks);
+            req.setAttribute("zones", zones);
+
+            // Forward to the manageRacks.jsp page
+            RequestDispatcher dispatcher = req.getRequestDispatcher("/manageRacks.jsp");
+            dispatcher.forward(req, res);
+        }
     }
+
+
 }

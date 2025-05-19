@@ -15,7 +15,7 @@
     :root {
       --sidebar-width: 220px;
       --header-height: 60px;
-      --sidebar-bg: #311F10;
+      --sidebar-bg: #156082;
       --sidebar-active-bg: #D9B98E;
     }
 
@@ -47,7 +47,7 @@
 
     #sidebar ul li a {
       display: block;
-      color: rgba(255,255,255,0.8);
+      color: white;
       padding: 12px 20px;
       text-decoration: none;
     }
@@ -67,7 +67,7 @@
       left: 230px;
       height: var(--header-height);
       width: calc(100% - 240px);
-      background: #311F10;
+      background: #156082;
       display: flex;
       justify-content: flex-end;
       align-items: center;
@@ -95,7 +95,7 @@
     .sidebar-header {
       position: relative;
       height: 200px; /* adjust height as needed */
-      background-image: url('images/logo5.png'); /* your logo path */
+      background-image: url('images/logo6.png'); /* your logo path */
       background-size: cover;       /* make the image cover the entire div */
       background-position: center;  /* center the image */
       background-repeat: no-repeat;
@@ -186,13 +186,16 @@
         <li class="<%= "manageRacks".equals(request.getParameter("activePage")) ? "active" : "" %>">
           <a href="manageRacks"><i class="bi bi-hdd-stack me-2"></i> Manage Rack</a>
         </li>
+        <li class="<%= "manageUser".equals(request.getParameter("activePage")) ? "active" : "" %>">
+           <a href="manageUser.jsp"><i class="fas fa-users me-2"></i> Manage Users</a>
+        </li>
       </ul>
     </li>
     <li class="<%= "reports".equals(request.getParameter("activePage")) ? "active" : "" %>">
       <a href="reports.jsp"><i class="bi bi-graph-up me-2"></i> Reports</a>
     </li>
     <li class="logout-btn">
-      <a href="logout" class="btn btn-danger w-100"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
+      <a href="login.jsp" class="btn btn-danger w-100"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
     </li>
   </ul>
 </div>
@@ -231,7 +234,7 @@
               </div>
               <div class="d-flex justify-content-between mt-3">
                 <a href="settings.jsp" class="btn btn-outline-primary btn-sm"><i class="bi bi-gear"></i> Settings</a>
-                <a href="logout.jsp" class="btn btn-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                <a href="login.jsp" class="btn btn-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a>
               </div>
             </li>
           </ul>

@@ -19,6 +19,8 @@
 <body>
 <div class="container">
         <h2 class="category-heading">Inventory List</h2>
+        <a href="Reorder" class="btn btn-primary mb-3 custom-add-btn">Reorder</a>
+
     <c:if test="${not empty param.success}">
         <div class="alert alert-success">${param.success}</div>
     </c:if>
@@ -53,62 +55,72 @@
         </c:forEach>
         </tbody>
     </table>
-    <h4 class="mt-5">Stock Level Summary</h4>
-    <table class="table table-bordered table-striped">
-        <thead class="table-secondary">
-            <tr>
-                <th>#</th>
-                <th>Product</th>
-                <th>Total Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="entry" items="${stockLevels}" varStatus="loop">
-            <tr>
-                <td>${loop.index + 1}</td>
-                <td>${entry.key}</td>
-                <td>${entry.value}</td>
-            </tr>
-        </c:forEach>
-        </tbody>
-    </table>
-    <h4 class="mt-5 text-danger">Reorder Notifications</h4>
-    <c:if test="${not empty reorderList}">
-        <table class="table table-bordered table-warning">
-            <thead class="table-danger">
-                <tr>
-                    <th>#</th>
-                    <th>Product</th>
-                    <th>Reorder Level</th>
-                    <th>Current Stock</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-            <c:forEach var="product" items="${reorderList}" varStatus="loop">
-                <tr>
-                    <td>${loop.index + 1}</td>
-                    <td>${product.productName}</td>
-                    <td>${product.reorderLevel}</td>
-                    <td>
-                        <c:out value="${stockLevels[product.productName]}" default="0"/>
-                    </td>
-                    <td><span class="badge bg-danger">Reorder Needed</span></td>
-                    <td>
-                        <form action="ReorderServlet" method="get">
-                            <input type="hidden" name="productId" value="${product.productId}" />
-                            <button type="submit" class="btn btn-sm btn-danger">Reorder</button>
-                        </form>
-                    </td>
-                </tr>
-            </c:forEach>
-            </tbody>
-        </table>
-    </c:if>
-    <c:if test="${empty reorderList}">
-        <div class="alert alert-success">No products need reordering.</div>
-    </c:if>
+    <div class="row">
+        <!-- Column 1: Stock Level Summary -->
+        <div class="col-md-6">
+            <h4 class="mt-5">Stock Level Summary</h4>
+            <table class="table table-bordered table-striped">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>Total Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="entry" items="${stockLevels}" varStatus="loop">
+                    <tr>
+                        <td>${loop.index + 1}</td>
+                        <td>${entry.key}</td>
+                        <td>${entry.value}</td>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Column 2: Reorder Notifications -->
+        <div class="col-md-6">
+            <h4 class="mt-5 text-danger">Reorder Notifications</h4>
+            <c:if test="${not empty reorderList}">
+                <table class="table table-bordered table-warning">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Reorder Level</th>
+                            <th>Current Stock</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="product" items="${reorderList}" varStatus="loop">
+                        <tr>
+                            <td>${loop.index + 1}</td>
+                            <td>${product.productName}</td>
+                            <td>${product.reorderLevel}</td>
+                            <td>
+                                <c:out value="${stockLevels[product.productName]}" default="0"/>
+                            </td>
+                            <td><span class="badge bg-danger">Reorder Needed</span></td>
+                            <td>
+                                <form action="ReorderServlet" method="get">
+                                    <input type="hidden" name="productId" value="${product.productId}" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Reorder</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </c:if>
+            <c:if test="${empty reorderList}">
+                <div class="alert alert-success">No products need reordering.</div>
+            </c:if>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>
